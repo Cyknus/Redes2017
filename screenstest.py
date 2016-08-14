@@ -13,6 +13,7 @@ Builder.load_string("""
         Label:
             text: 'Username'
         TextInput:
+            id: txt_input_username
             multiline: False
         Label:
             text: 'Password'
@@ -21,7 +22,7 @@ Builder.load_string("""
             password: True
         Button:
             text: 'ingresar'
-            on_press: root.imprimele()
+            on_press: root.accessRequest(txt_input_username.text)
 
 <SettingsScreen>:
     BoxLayout:
@@ -35,8 +36,8 @@ Builder.load_string("""
 # Declare both screens
     
 class LoginScreen(Screen):
-    def imprimele(self):
-        print('ok')
+    def accessRequest(self, text):
+        print(text)
 
 class SettingsScreen(Screen):
     pass

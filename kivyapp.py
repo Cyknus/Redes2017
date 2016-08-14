@@ -6,13 +6,21 @@ from kivy.uix.label import Label
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.textinput import TextInput 
 from kivy.uix.button import Button 
-from kivy.uix.popup import Popup 
+from kivy.uix.popup import Popup
+from kivy.uix.screenmanager import ScreenManager, Screen
+
 
 class LoginScreen(GridLayout):
 
 
     def __init__(self, **kwargs):
         super(LoginScreen, self).__init__(**kwargs)
+        self.sm = ScreenManager()
+        self.screen = Screen(name='login')
+        self.sm.add_widget(self.screen)
+        self.screen = Screen(name='calcu')
+        self.sm.add_widget(self.screen)
+        self.sm.current = 'calcu'
         self.cols = 2
         self.btn = Button(text="ingresar")
         self.username = TextInput(multiline=False)
@@ -27,7 +35,8 @@ class LoginScreen(GridLayout):
     def btnPressed(self, btn):
         authorized = self.validate(self.username.text, self.password.text)
         if authorized:
-            print("chido one")
+            self.sm.current = 'login'
+            print('hoo')
         else:
             popup = Popup(title='Error de login', 
                 content=Label(text="No tienes acceso al sistema."),
