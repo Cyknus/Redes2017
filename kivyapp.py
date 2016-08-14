@@ -20,7 +20,6 @@ class LoginScreen(GridLayout):
         self.sm.add_widget(self.screen)
         self.screen = Screen(name='calcu')
         self.sm.add_widget(self.screen)
-        self.sm.current = 'calcu'
         self.cols = 2
         self.btn = Button(text="ingresar")
         self.username = TextInput(multiline=False)
@@ -35,8 +34,7 @@ class LoginScreen(GridLayout):
     def btnPressed(self, btn):
         authorized = self.validate(self.username.text, self.password.text)
         if authorized:
-            self.sm.current = 'login'
-            print('hoo')
+            self.sm.current = 'calcu'
         else:
             popup = Popup(title='Error de login', 
                 content=Label(text="No tienes acceso al sistema."),
