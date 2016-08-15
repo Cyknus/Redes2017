@@ -46,9 +46,6 @@ class LoginScreen(Screen):
         users = json.load(open("Code/input.txt"))
         if username in users:
             return users[username] == encrypted
-        # for i in users:
-        #     if i == username:
-        #         return users[i] == encrypted
         return False
 
     @staticmethod
