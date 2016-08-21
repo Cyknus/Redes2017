@@ -14,6 +14,12 @@
 #                                                    #
 # Distributed under terms of the MIT license.        #
 #################################################### #
+
+######################################################
+# ACTUALIZACIÓN                                      #
+# La GUI será en Kivy 1.9.1                          #
+# Así que será necesario instalar kivy 1.9.1         #
+######################################################
 import sys, getopt
 
 
