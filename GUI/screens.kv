@@ -1,0 +1,62 @@
+<LocalLoginScreen>:
+    GridLayout:
+        cols:
+            2
+        Label:
+            text: '¿Cuál es mi puerto?'
+        TextInput:
+            id: my_port
+            multiline: False
+        Label:
+            text: '¿Cuál es el puerto del contacto?'
+        TextInput:
+            id: contacts_port
+            multiline: False
+        Button:
+            text: 'Ingresar'
+            on_press: root.accessRequest(my_port.text, contacts_port.text)
+        Button:
+            text: 'Limpiar'
+            on_press: my_port.text=''
+            on_press: contacts_port.text=''
+
+<RemoteLoginScreen>:
+    GridLayout:
+        cols:
+            2
+        Label:
+            text: '¿Cuál es la IP del contacto?'
+        TextInput:
+            id: contacts_IP
+            multiline: False
+        Button:
+            text: 'Ingresar'
+            on_press: root.accessRequest(contacts_IP.text)
+        Button:
+            text: 'Limpiar'
+            on_press: contacts_IP.text=''
+
+<ChatScreen>:
+    FloatLayout:
+        Label:
+            text: '[i][u]Conversación[/u][/i]'
+            size_hint: .20,.05
+            pos_hint: {'x':0, 'y':.95}
+
+        Label:
+            id: display
+            text: ''
+            size_hint: 1,.7
+            pos_hint: {'x':0, 'y':.25}
+
+        TextInput:
+            id: block_of_typos
+            multiline: True
+            size_hint: .7,.25
+            pos_hint: {'x':0, 'y':0}            
+
+        Button:
+            id: '[i]Enviar[/i]'
+            on_press: root.send(block_of_typos.text)
+            size_hint: .3,.25
+            pos_hint: {'x':.7, 'y':0}
