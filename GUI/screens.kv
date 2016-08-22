@@ -1,63 +1,81 @@
 <LocalLoginScreen>:
     GridLayout:
-        cols:
-            2
+        spacing: 10
+        padding: 5
+        cols:  2
         Label:
             text: '¿Cuál es mi puerto?'
+            size_hint: .8, .3
+            color: (0.3, 0.3, 0.3, 1.0)
         TextInput:
             id: my_port
             multiline: False
+            size_hint: .2, .3
+            padding: [8,  ( self.height - self.line_height ) / 2]
         Label:
             text: '¿Cuál es el puerto del contacto?'
+            size_hint: .8, .3
+            color: (0.3, 0.3, 0.3, 1.0)
         TextInput:
             id: contacts_port
             multiline: False
+            size_hint: .2, .3
+            padding: [8,  ( self.height - self.line_height ) / 2]
         Button:
             text: 'Ingresar'
+            size_hint: .4, .2
+            background_color: (0.43, 0.87, 0.82, 1.0)
             on_press: root.accessRequest(my_port.text, contacts_port.text)
         Button:
             text: 'Limpiar'
+            size_hint: .4, .2
             on_press: my_port.text=''
             on_press: contacts_port.text=''
 
 <RemoteLoginScreen>:
     GridLayout:
+        spacing: 10
+        padding: 5
         cols:
             2
         Label:
             text: '¿Cuál es la IP del contacto?'
+            color: (0.3, 0.3, 0.3, 1.0)
+            size_hint: .7, .6
         TextInput:
             id: contacts_IP
             multiline: False
+            size_hint: .3, .6
+            padding: [8,  ( self.height - self.line_height ) / 2]
         Button:
             text: 'Ingresar'
             on_press: root.accessRequest(contacts_IP.text)
+            size_hint: .7, .4
+            background_color: (0.43, 0.87, 0.82, 1.0)
         Button:
             text: 'Limpiar'
             on_press: contacts_IP.text=''
+            size_hint: .3, .4
 
 <ChatScreen>:
     FloatLayout:
-        Label:
-            text: '[i] [b] Conversación: [/b] [/i]'
-            markup: True
-            size_hint: .20,.05
-            pos_hint: {'x':0, 'y':.95}
-
-        Label:
+        ScrollView:
             id: display
-            size_hint: 1,.7
-            pos_hint: {'x':0, 'y':.25}
-
+            size_hint: .98, .85
+            pos_hint: {'x':.005, 'y': 0.12}
+            GridLayout:
+                cols: 1
+                spacing: 10
+                size_hint_y: None
+                id: layout
         TextInput:
             id: block_of_typos
             multiline: True
-            size_hint: .7,.25
-            pos_hint: {'x':0, 'y':0}            
-
+            size_hint: .84, .11
+            pos_hint: {'x':.005, 'y':.005}
         Button:
             text: 'Enviar'
             italic: True
             on_press: root.send(block_of_typos.text)
-            size_hint: .3,.25
-            pos_hint: {'x':.7, 'y':0}
+            size_hint: .14, .11
+            pos_hint: {'x':.85, 'y':.005}
