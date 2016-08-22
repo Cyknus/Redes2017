@@ -3,7 +3,7 @@
 
 from Constants import *
 from .Channel import Channel
-from GUI.Chat import MyLabel
+from GUI.ikivy import MyLabel
 
 class MyApiClient:
     def  __init__(self):
@@ -15,5 +15,5 @@ class MyApiClient:
         self.display = None # donde se agregarán los mensajes
 
     def receive(self, message):
-        msg = Label(text=message, color=Constants.RGB_RECD, halign='left')
+        msg = MyLabel(text=message, color=Constants.RGB_RECD)
         self.display.add_widget(msg)

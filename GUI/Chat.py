@@ -3,10 +3,11 @@
 
 from kivy.app import App
 from kivy.lang import Builder
-from kivy.uix.popup import Popup
 from kivy.uix.label import Label
 from kivy.uix.screenmanager import ScreenManager, Screen
 from kivy.core.window import Window
+
+from .ikivy import MyLabel
 
 from Channel.Channel import Channel
 from Channel.ApiClient import MyApiClient
@@ -60,15 +61,7 @@ class ChatApp(App):
     def on_stop(self):
         client.server.close()
 
-# better label
-class MyLabel(Label):
-    def __init__(self, color, halign='right'):
-        super(MyLabel, self).__init__()
-        self.size_hint = Constants.SIZE_HINT_MSG
-        self.height = Constants.MSG_HEIGHT
-        self.color = color
-        self.text_size = self.size
-
+# acoplar todo
 def build_screen_manager(local):
     if local:
         sm.add_widget(LocalLoginScreen(name="login"))
