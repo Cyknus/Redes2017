@@ -65,8 +65,8 @@
             pos_hint: {'x':.005, 'y': 0.12}
             GridLayout:
                 cols: 1
-                spacing: 5
                 size_hint: 1, None
+                padding: 5
                 id: layout
         TextInput:
             id: block_of_typos
@@ -79,3 +79,4 @@
             on_press: root.send(block_of_typos.text)
             size_hint: .14, .11
             pos_hint: {'x':.85, 'y':.005}
+            background_color: (0.43, 0.87, 0.82, 1.0)
