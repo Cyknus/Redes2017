@@ -5,8 +5,8 @@ Chat usando XMLRPC.
 ### Dependencias
 * Python 3
 * Kivy 1.9
-* 
-### Reporte
+  
+Reporte
 
 1.- Definir el concepto de procedimientos remotos
 Consisten en un protocolo que permite a un software o programa ejecutar código en otra máquina remota sin preocuparse por la comunicación ocultando todos los detalles del código correspondiente a la comunicación a través de la red.
