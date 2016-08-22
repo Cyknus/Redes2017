@@ -25,30 +25,43 @@ client = MyApiClient()
 class LocalLoginScreen(Screen):
     def accessRequest(self, my_port, contact_port):
         """ Ingreso de modo local """
-        client.proxy = Channel.connect_to(contact_port=contact_port)
-        client.server = Channel.server_up(client, my_port)
-        print("Conexión establecida entre " + str(my_port) + " hacia " + str(contact_port))
-
-        # lanzar la siguiente ventana
-        sm.current = "chat"
-        Window.size = Constants.CHAT_SIZE
-
+        try:
+	        client.proxy = Channel.connect_to(contact_port=contact_port)
+ 	       client.server = Channel.server_up(client, my_port)
+  	      print("Conexión establecida entre " + str(my_port) + " hacia " + str(contact_port))
+      	
+	        # lanzar la siguiente ventana
+ 	       sm.current = "chat"
+  	      Window.size = Constants.CHAT_SIZE
+  		except Exception as e:
+      		client.proxy = None
+      		client.server.close() # funciona o puede chillar?
+      		print("No se ha podido establecer una conexión. Intenta de nuevo.")
+      
 class RemoteLoginScreen(Screen):
     def accessRequest(self, contact_ip):
-        """ Ingreso de modo remoto """
-        client.proxy = Channel.connect_to(contact_ip=contact_ip)
-        client.server = Channel.server_up(client)
-        print("Conexión establecida hacia " + str(contact_ip))
+        # """ Ingreso de modo remoto """
+        try:
+            client.proxy = Channel.connect_to(contact_ip=contact_ip)
+        	client.server = Channel.server_up(client)
+        	print("Conexión establecida hacia " + str(contact_ip))
 
-        # lanzar la siguiente ventana
-        sm.current = "chat"
-        Window.size = Constants.CHAT_SIZE
+	        # lanzar la siguiente ventana
+ 	       sm.current = "chat"
+  	      Window.size = Constants.CHAT_SIZE
+ 		except Exception as e:
+ 			client.proxy = None
+ 			client.server.close()
+ 			print("No se ha podido establecer una conexión. Intenta de nuevo")
 
 class ChatScreen(Screen):
     def send(self, text):
-        client.proxy.sendMessage_wrapper(text)
-        # aquí tiene que aparecer en pantalla el último enviado
-        msg = MyLabel(text=text, color=Constants.RGB_SEND)
+        try:
+	        client.proxy.sendMessage_wrapper(text)
+ 	       # aquí tiene que aparecer en pantalla el último enviado
+  	      msg = MyLabel(text=text, color=Constants.RGB_SEND)
+  		except Exception as e:
+      		msg = MyLabel(text=text, color=Constants.RGB_NSEND)
         client.display.add_widget(msg)
         # limpiar lo que está escrito
         self.ids.block_of_typos.text = ''

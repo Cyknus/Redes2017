@@ -12,7 +12,7 @@ class MyApiServer:
             client: el cliente al que notificará si hay nuevos mensajes
         """
         self.functions = FunctionWrapper(client)
-        # configurar el servidor
+        # configurar el servidor TODO tal vez esto debería moverse..
         self.server = SimpleXMLRPCServer(("localhost", int(my_port)))
         self.server.register_introspection_functions()
         self.server.register_multicall_functions()
