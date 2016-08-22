@@ -13,14 +13,16 @@ class Channel:
     los métodos para conectarse con un contacto y enviar mensajes.
     """
 
-    def  __init__(self, client, my_port = Constants.CHAT_PORT):
-        """ Constructor de la clase. Establece el canal en el puerto dado """
-        self.port = int(my_port)
-        self.server = MyApiServer(self.port, client)
-        api_server_thread = Thread(target=self.server.server.serve_forever)
+    @staticmethod
+    def server_up(client, my_port=Constants.CHAT_PORT):
+        """ Levanta el servidor del cliente """
+        api_server = MyApiServer(client, int(my_port))
+        api_server_thread = Thread(target=api_server.server.serve_forever)
         api_server_thread.start()
+        return api_server
 
-    def connect_to(self, contact_ip = None, contact_port = Constants.CHAT_PORT):
+    @staticmethod
+    def connect_to(contact_ip = None, contact_port = Constants.CHAT_PORT):
         """
             Establece la conexión a un contacto
            @param <str> contact_ip: Si no se trabaja de manera local
@@ -31,16 +33,16 @@ class Channel:
         """
 
         if contact_ip:
-            self.contact_server = ServerProxy('http://%s:%i'%(contact_ip, contact_port), allow_none=True)
+            contact_server = ServerProxy('http://%s:%i'%(contact_ip, int(contact_port)), allow_none=True)
         else:
-            self.contact_server = ServerProxy('http://localhost:%i'%contact_port, allow_none=True)
+            contact_server = ServerProxy('http://localhost:%i'%int(contact_port), allow_none=True)
 
-        # Establecer conexión bidireccional?
-        # self.contact_server.ask("127.0.0.1", self.port)
+        return contact_server
 
-    def send_text(self, text):
+    @staticmethod
+    def send_text(text):
         """
             Se encarga de mandar un mensaje al contacto
             con el que se establece conexión.
         """
-        self.contact_server.sendMessage_wrapper(text)
+        pass

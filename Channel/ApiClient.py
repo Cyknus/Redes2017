@@ -3,20 +3,17 @@
 
 from Constants import *
 from .Channel import Channel
+from GUI.Chat import MyLabel
 
-class MyApiClient: # wtf?
-    def  __init__(self, my_port = Constants.CHAT_PORT):
+class MyApiClient:
+    def  __init__(self):
         """ Constructor de la clase. Establece el canal en el puerto dado """
-        self.channel = Channel(self, my_port)
+        self.proxy = None # al que se mandan mensajes
+        self.server = None # servidor asociado
 
-    def connect_local(self, contact_port):
-        self.channel.connect_to(contact_port=contact_port)
-
-    def connect_remote(self, contact_ip):
-        self.channel.connect_to(contact_ip=contact_ip)
-
-    def send(self, message):
-        self.channel.send_text(message)
+        # GUI
+        self.display = None # donde se agregarán los mensajes
 
     def receive(self, message):
-        pass # TODO aqui marcamos en la GUI
+        msg = Label(text=message, color=Constants.RGB_RECD, halign='left')
+        self.display.add_widget(msg)
