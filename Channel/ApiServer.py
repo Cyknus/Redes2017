@@ -1,29 +1,21 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-from xmlrpc.server import SimpleXMLRPCServer
+
 from Constants import *
 
 class MyApiServer:
-    def __init__(self, client, my_port = Constants.CHAT_PORT):
+    def __init__(self, client):
         """
             Constructor de la clase.
             my_port : el puerto en el que escuchará el servidor
             client: el cliente al que notificará si hay nuevos mensajes
         """
-        self.functions = FunctionWrapper(client)
-        # configurar el servidor TODO tal vez esto debería moverse..
-        self.server = SimpleXMLRPCServer(("localhost", int(my_port)))
-        self.server.register_introspection_functions()
-        self.server.register_multicall_functions()
-        self.server.register_instance(self.functions)
-
-    def close(self): 
-        self.server.shutdown()
-        self.server.server_close()
+        self.functions = FunctionWrapper(client) # idk
 
 class FunctionWrapper:
     def __init__(self, client):
+        """ Inicializa el marco de las funciones con el cliente dado"""
         self.client = client
 
     def sendMessage_wrapper(self, message):

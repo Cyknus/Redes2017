@@ -9,7 +9,6 @@ from kivy.core.window import Window
 
 from .ikivy import MyLabel
 
-from Channel.Channel import Channel
 from Channel.ApiClient import MyApiClient
 from Constants import *
 
@@ -26,42 +25,44 @@ class LocalLoginScreen(Screen):
     def accessRequest(self, my_port, contact_port):
         """ Ingreso de modo local """
         try:
-	        client.proxy = Channel.connect_to(contact_port=contact_port)
- 	       client.server = Channel.server_up(client, my_port)
-  	      print("Conexión establecida entre " + str(my_port) + " hacia " + str(contact_port))
-      	
-	        # lanzar la siguiente ventana
- 	       sm.current = "chat"
-  	      Window.size = Constants.CHAT_SIZE
-  		except Exception as e:
-      		client.proxy = None
-      		client.server.close() # funciona o puede chillar?
-      		print("No se ha podido establecer una conexión. Intenta de nuevo.")
-      
+            client.channel.connect_to(contact_port=contact_port)
+            client.channel.server_up(client, my_port)
+            print("Conexión establecida entre " + str(my_port) + " hacia " + str(contact_port))
+
+            # lanzar la siguiente ventana
+            sm.current = "chat"
+            Window.size = Constants.CHAT_SIZE
+        except Exception as e:
+            if client.channel.server is not None:
+                client.channel.server_down()
+            print("No se ha podido establecer una conexión. Intenta de nuevo.")
+
 class RemoteLoginScreen(Screen):
     def accessRequest(self, contact_ip):
-        # """ Ingreso de modo remoto """
+        """ Ingreso de modo remoto """
         try:
-            client.proxy = Channel.connect_to(contact_ip=contact_ip)
-        	client.server = Channel.server_up(client)
-        	print("Conexión establecida hacia " + str(contact_ip))
+            client.connect_to(contact_ip=contact_ip)
+            client.server_up(client)
+            print("Conexión establecida hacia " + str(contact_ip))
 
 	        # lanzar la siguiente ventana
- 	       sm.current = "chat"
-  	      Window.size = Constants.CHAT_SIZE
- 		except Exception as e:
- 			client.proxy = None
- 			client.server.close()
- 			print("No se ha podido establecer una conexión. Intenta de nuevo")
+            sm.current = "chat"
+            Window.size = Constants.CHAT_SIZE
+        except Exception as e:
+            if client.channel.server is not None:
+                client.channel.server_down()
+            print("No se ha podido establecer una conexión. Intenta de nuevo")
 
 class ChatScreen(Screen):
     def send(self, text):
         try:
-	        client.proxy.sendMessage_wrapper(text)
- 	       # aquí tiene que aparecer en pantalla el último enviado
-  	      msg = MyLabel(text=text, color=Constants.RGB_SEND)
-  		except Exception as e:
-      		msg = MyLabel(text=text, color=Constants.RGB_NSEND)
+            client.channel.send_text(text)
+            # aquí tiene que aparecer en pantalla el último enviado
+            msg = MyLabel(text=text, color=Constants.RGB_SEND)
+        except Exception as e:
+            msg = MyLabel(text=text, color=Constants.RGB_NSEND)
+            print("Mensaje no ha podido ser enviado.")
+
         client.display.add_widget(msg)
         # limpiar lo que está escrito
         self.ids.block_of_typos.text = ''
@@ -72,7 +73,8 @@ class ChatApp(App):
         return sm
 
     def on_stop(self):
-        client.server.close()
+        if client.channel.server is not None:
+            client.channel.server_down()
 
 # acoplar todo
 def build_screen_manager(local):

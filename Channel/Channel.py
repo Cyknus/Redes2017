@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from xmlrpc.client import ServerProxy
+from xmlrpc.server import SimpleXMLRPCServer
 from threading import Thread
 from Constants import *
 from .ApiServer import MyApiServer
@@ -13,16 +14,33 @@ class Channel:
     los métodos para conectarse con un contacto y enviar mensajes.
     """
 
-    @staticmethod
-    def server_up(client, my_port=Constants.CHAT_PORT):
-        """ Levanta el servidor del cliente """
-        api_server = MyApiServer(client, int(my_port))
-        api_server_thread = Thread(target=api_server.server.serve_forever)
-        api_server_thread.start()
-        return api_server
+    def __init__(self):
+        """ Inicializa el canal con apuntadores None (hasta que se configuren)"""
+        self.server = None # servidor asociado
+        self.proxy = None # proxy al contacto
 
-    @staticmethod
-    def connect_to(contact_ip = None, contact_port = Constants.CHAT_PORT):
+    def server_up(self, client, my_port=Constants.CHAT_PORT):
+        """ Levanta el servidor del cliente
+            Puede arrojar una excepción si el servidor no se puede lanzar.
+        """
+        api_server = MyApiServer(client) # servidor asociado a ese cliente
+        # configuración de xmlrpc.. todo se hace aquí
+        xmlrpc_server = SimpleXMLRPCServer(("localhost", int(my_port)))
+        xmlrpc_server.register_introspection_functions()
+        xmlrpc_server.register_multicall_functions()
+        xmlrpc_server.register_instance(api_server.functions)
+        # lanzar servidor
+        api_server_thread = Thread(target=xmlrpc_server.serve_forever)
+        api_server_thread.start()
+        # guardar instancia para poder matar el hilo después
+        self.server = xmlrpc_server
+
+    def server_down(self):
+        """ Detiene el hilo de ejecución del servidor del cliente"""
+        self.server.shutdown()
+        self.server.server_close()
+
+    def connect_to(self, contact_ip = None, contact_port = Constants.CHAT_PORT):
         """
             Establece la conexión a un contacto
            @param <str> contact_ip: Si no se trabaja de manera local
@@ -37,12 +55,12 @@ class Channel:
         else:
             contact_server = ServerProxy('http://localhost:%i'%int(contact_port), allow_none=True)
 
-        return contact_server
+        self.proxy = contact_server
 
-    @staticmethod
-    def send_text(text):
+
+    def send_text(self, text):
         """
             Se encarga de mandar un mensaje al contacto
             con el que se establece conexión.
         """
-        pass
+        self.proxy.sendMessage_wrapper(text)
