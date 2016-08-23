@@ -2,7 +2,8 @@
 
 ## Práctica 2
 
-** Integrantes **
+**Integrantes**
+
 1. Coloapa Díaz Alejandra Krystel
 2. Marín Arriaga Adolfo
 3. Ochoa González Uriel A.
@@ -23,6 +24,7 @@ Es utilizado para la comunicación de datos a través de una red de paquetes com
 Éste especifica la aplicación a la que se dirigen los datos, así, cuando el equipo recibe información que va dirigida a un puerto, los datos se envían a la aplicación relacionada. Si se trata de una solicitud enviada a la aplicación, la aplicación se denomina aplicación servidor. Si se trata de una respuesta, entonces hablamos de una aplicación cliente.
 
 **4.- ¿Se puede tener dos clientes en una misma computadora?**
+
 Sí
 
 **5.- Particularidades del código**
