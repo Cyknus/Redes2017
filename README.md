@@ -1,6 +1,11 @@
 # Redes2017
 
-Práctica 2
+## Práctica 2
+
+** Integrantes **
+1. Coloapa Díaz Alejandra Krystel
+2. Marín Arriaga Adolfo
+3. Ochoa González Uriel A.
 
 ### Reporte
 
