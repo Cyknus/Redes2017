@@ -36,5 +36,10 @@ Sí
 
 Uso:
 
-*python3 GraphicalUserInterface.py -- -l* Para uso local
-*python3 GraphicalUserInterface.py --* Para uso en distintos equipos
+* Para uso local
+
+*python3 GraphicalUserInterface.py -- -l* 
+
+* Para uso remoto
+
+*python3 GraphicalUserInterface.py --*
