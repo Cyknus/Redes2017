@@ -12,3 +12,7 @@ RGB_NSEND = (1.0, 0.0, 0.0, 1.0)
 RGB_RECD = (0.322, 0.169, 0.341, 1)
 
 SIZE_HINT_MSG = (1, None)
+
+WIDTH = 2
+CHANNELS = 2
+RATE = 44100

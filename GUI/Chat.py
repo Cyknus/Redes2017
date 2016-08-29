@@ -13,15 +13,19 @@ from .ikivy import MyLabel
 
 from Channel.Channel import Channel
 from Constants.Constants import *
+from Channel.AudioCall import *
 
-Window.clearcolor = RGBA_BG
+Window.clearcolor = Constants.RGBA_BG
 
 # Descripción de las ventanas
 Builder.load_file('GUI/screens.kv')
+# Instanciar manejador..
+pa = AudioCall()
 
 class LocalLoginScreen(Screen):
     def accessRequest(self, my_port, contact_port):
         """ Ingreso de modo local """
+        print("Estableciendo conexión..")
         try:
             channel = Channel(gui=self.manager, my_port=my_port, contact_port=contact_port)
             print("Conexión establecida entre " + str(my_port) + " hacia " + str(contact_port))
@@ -52,6 +56,7 @@ class ChatScreen(Screen):
         super(ChatScreen, self).__init__(**kwargs)
         self.ids.layout.bind(minimum_height=self.ids.layout.setter('height'))
         self.channel = channel
+        self.stream_record = None
 
     def send(self, text):
         try:
@@ -71,6 +76,33 @@ class ChatScreen(Screen):
     def display_message(self, text):
         msg = MyLabel(text=text, color=RGB_RECD)
         self.ids.layout.add_widget(msg)
+
+    def call(self):
+        if self.stream_record is None:
+            print("Llamando..")
+            self.ids.call_button.text = 'Colgar'
+            # abre el stream para grabar e inicia el thread que lo maneja
+            self.stream_record = pa.record(ChatScreen.callback)
+            # abrir stream para escuchar
+            AudioCall.openOutput()
+        else:
+            print("Colgando..")
+            self.ids.call_button.text = "Llamar"
+            # detener el servicio de llamada
+            self.stream_record.stop()
+            # Actualizar bandera
+            self.stream_record = None
+            # Cerramos..
+            AudioCall.closeOutput()
+
+    @staticmethod
+    def callback(in_data, f, t, s):
+        try:
+            client.channel.send_bytes(in_data)
+        except Exception as e:
+            print(e)
+            print("No se ha podido enviar audio")
+        return (None, AudioCall.CONTINUE)
 
 class ChatApp(App):
     def __init__(self, local_mode, **kwargs):

@@ -12,3 +12,12 @@ class MyApiClient:
             contact_server = ServerProxy('http://%s:%i'%(get_ip_address(), int(contact_port)), allow_none=True)
 
         self.proxy = contact_server
+
+
+    def play(self, audio):
+        p = pyaudio.PyAudio()
+        stream = p.open(format=p.get_format_from_width(Constants.WIDTH),
+                            channels=Constants.CHANNELS,
+                            rate=Constants.RATE,
+                            output=True)
+        stream.write(audio.data)

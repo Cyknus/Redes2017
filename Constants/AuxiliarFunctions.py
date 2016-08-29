@@ -15,6 +15,7 @@
 # Distributed under terms of the MIT license.       #
 #####################################################
 import socket
+import time
 
 """**************************************************
  Metodo auxiliar que hace uso de internet para
@@ -25,3 +26,7 @@ def get_ip_address():
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     s.connect(("8.8.8.8", 80))
     return "%s"% (s.getsockname()[0])
+
+def dummy_run(arg, **kwargs):
+    while arg():
+        time.sleep(0.1)

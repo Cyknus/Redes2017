@@ -5,6 +5,7 @@ from Constants.Constants import *
 from Constants.AuxiliarFunctions import *
 from xmlrpc.server import SimpleXMLRPCServer
 from threading import Thread
+import pyaudio
 
 class MyApiServer:
     def __init__(self, gui, my_port=CHAT_PORT):
@@ -29,4 +30,8 @@ class FunctionWrapper:
 
     def sendMessage_wrapper(self, message):
         self.gui.current_screen.display_message(message)
+        return "OK"
+
+    def listen(self, d):
+        self.gui.current_screen.listen_audio(d)
         return "OK"

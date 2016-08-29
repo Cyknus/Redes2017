@@ -13,3 +13,8 @@ class Channel:
     def send_text(self, text):
         res = self.api_client.proxy.sendMessage_wrapper(text)
         print("Contact response " + res)
+
+    def send_bytes(self, in_data):
+        d = Binary(in_data)
+        res = self.api_client.proxy.listen(d)
+        print("Contact responde " + res)
