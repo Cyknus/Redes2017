@@ -1,7 +1,7 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-from xmlrpc.client import ServerProxy
+from xmlrpc.client import ServerProxy, Binary
 from xmlrpc.server import SimpleXMLRPCServer
 from threading import Thread
 from Constants import *
@@ -64,3 +64,7 @@ class Channel:
             con el que se establece conexión.
         """
         self.proxy.sendMessage_wrapper(text)
+
+    def send_bytes(self, in_data):
+        d = Binary(in_data)
+        self.proxy.listen(d)

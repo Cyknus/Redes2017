@@ -3,6 +3,7 @@
 
 
 from Constants import *
+import pyaudio
 
 class MyApiServer:
     def __init__(self, client):
@@ -24,4 +25,9 @@ class FunctionWrapper:
         """
         self.client.receive(message) # notificar el mensaje recibido
 
-        return 1 # códigos para estado de mensaje?
+        return 1
+
+    def listen(self, d):
+        self.client.play(d) # hey, te llaman
+        # HERE! Suena en Channel antes de enviar, al recibir ya no hace nada..
+        return 1
