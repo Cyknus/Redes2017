@@ -21,6 +21,7 @@ Window.clearcolor = Constants.RGBA_BG
 Builder.load_file('GUI/screens.kv')
 # Instanciar manejador..
 pa = AudioCall()
+pa.openOutput() # TODO modularizar esto para no tener el stream abierto todo el tiempo..
 
 class LocalLoginScreen(Screen):
     def accessRequest(self, my_port, contact_port):
@@ -87,7 +88,7 @@ class ChatScreen(Screen):
             # abre el stream para grabar e inicia el thread que lo maneja
             self.stream_record = pa.record(ChatScreen.callback)
             # abrir stream para escuchar
-            AudioCall.openOutput()
+            #AudioCall.openOutput()
         else:
             print("Colgando..")
             self.ids.call_button.text = "Llamar"
@@ -129,3 +130,4 @@ class ChatApp(App):
         screen = self.sm.current_screen
         if type(screen) is ChatScreen:
             screen.channel.api_server.stop()
+        pa.closeOutput()
