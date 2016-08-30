@@ -13,18 +13,13 @@ class MyApiClient:
         self.channel = Channel() # canal de comunicación
 
         # GUI
-        self.display = None # donde se agregarán los mensajes
+        self.display = None # Ligar la pantalla del chat
 
     def receive(self, message):
         """ Notifica en pantalla el mensaje recibido """
         # mostrar en pantalla el mensaje recibido
         msg = MyLabel(text=message, color=Constants.RGB_RECD)
-        self.display.add_widget(msg)
+        self.display.ids.layout.add_widget(msg)
 
     def play(self, audio):
-        p = pyaudio.PyAudio()
-        stream = p.open(format=p.get_format_from_width(Constants.WIDTH),
-                            channels=Constants.CHANNELS,
-                            rate=Constants.RATE,
-                            output=True)
-        stream.write(audio.data)
+        self.display.play(audio) # porquenosgustapasaralassiguientesfunciones

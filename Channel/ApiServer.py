@@ -27,7 +27,8 @@ class FunctionWrapper:
 
         return 1
 
-    def listen(self, d):
-        self.client.play(d) # hey, te llaman
-        # HERE! Suena en Channel antes de enviar, al recibir ya no hace nada..
+    def listen(self, audio):
+        
+        self.client.play(audio.data) # hey, te llaman
+
         return 1

@@ -22,7 +22,7 @@ Builder.load_file('GUI/screens.kv')
 sm = ScreenManager()
 # El cliente que se levanta
 client = MyApiClient()
-# Instanciar manejador..
+# Sólo una instancia de pyAudio
 pa = AudioCall()
 
 class LocalLoginScreen(Screen):
@@ -64,6 +64,9 @@ class ChatScreen(Screen):
         self.stream_record = None
 
     def send(self, text):
+        if text == '':
+            return
+
         try:
             client.channel.send_text(text)
             # aquí tiene que aparecer en pantalla el último enviado
@@ -82,8 +85,6 @@ class ChatScreen(Screen):
             self.ids.call_button.text = 'Colgar'
             # abre el stream para grabar e inicia el thread que lo maneja
             self.stream_record = pa.record(callback)
-            # abrir stream para escuchar
-            AudioCall.openOutput()
         else:
             print("Colgando..")
             self.ids.call_button.text = "Llamar"
@@ -91,13 +92,17 @@ class ChatScreen(Screen):
             self.stream_record.stop()
             # Actualizar bandera
             self.stream_record = None
-            # Cerramos..
-            AudioCall.closeOutput()
+
+    def play(self, audio):
+        pa.openOutput()
+        pa.stream.write(audio)
+        pa.closeOutput()
 
 # mientras vemos a donde moverla..
 def callback(in_data, f, t, s):
-    client.channel.send_bytes(in_data)
-    return (None, AudioCall.CONTINUE)
+    client.channel.send_bytes(in_data) # enviar chunk
+
+    return (None, AudioCall.CONTINUE) # continuar grabando
 
 # dummy class
 class ChatApp(App):
@@ -124,7 +129,7 @@ def build_screen_manager(local):
 
     # Make sure the height is such that there is something to scroll.
     root.ids.layout.bind(minimum_height=root.ids.layout.setter('height'))
-    client.display = root.ids.layout
+    client.display = root
 
     # creamos la aplicación
     chat = ChatApp()
