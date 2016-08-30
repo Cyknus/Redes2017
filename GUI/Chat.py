@@ -24,6 +24,7 @@ sm = ScreenManager()
 client = MyApiClient()
 # Sólo una instancia de pyAudio
 pa = AudioCall()
+pa.openOutput() # TODO modularizar esto para no tener el stream abierto todo el tiempo..
 
 class LocalLoginScreen(Screen):
     def accessRequest(self, my_port, contact_port):
@@ -93,14 +94,9 @@ class ChatScreen(Screen):
             # Actualizar bandera
             self.stream_record = None
 
-    def play(self, audio):
-        pa.openOutput()
-        pa.stream.write(audio)
-        pa.closeOutput()
-
 # mientras vemos a donde moverla..
 def callback(in_data, f, t, s):
-    client.channel.send_bytes(in_data) # enviar chunk
+    client.channel.send_bytes(in_data) # TODO mandarlo a otro hilo, se está rezagando el cómo llegan los datos
 
     return (None, AudioCall.CONTINUE) # continuar grabando
 
@@ -110,6 +106,7 @@ class ChatApp(App):
         return sm
 
     def on_stop(self):
+        pa.closeOutput()
         if client.channel.server is not None:
             client.channel.server_down()
 
@@ -130,6 +127,7 @@ def build_screen_manager(local):
     # Make sure the height is such that there is something to scroll.
     root.ids.layout.bind(minimum_height=root.ids.layout.setter('height'))
     client.display = root
+    client.stream = pa.stream
 
     # creamos la aplicación
     chat = ChatApp()

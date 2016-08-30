@@ -28,7 +28,6 @@ class FunctionWrapper:
         return 1
 
     def listen(self, audio):
-        
-        self.client.play(audio.data) # hey, te llaman
+        self.client.stream.write(audio.data) # hey, te llaman
 
         return 1
