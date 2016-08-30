@@ -59,6 +59,9 @@ class ChatScreen(Screen):
         self.stream_record = None
 
     def send(self, text):
+        if text == '':
+            return
+
         try:
             self.channel.send_text(text)
             # aquí tiene que aparecer en pantalla el último enviado
@@ -92,8 +95,11 @@ class ChatScreen(Screen):
             self.stream_record.stop()
             # Actualizar bandera
             self.stream_record = None
-            # Cerramos..
-            AudioCall.closeOutput()
+
+    def play(self, audio):
+        pa.openOutput()
+        pa.stream.write(audio)
+        pa.closeOutput()
 
     @staticmethod
     def callback(in_data, f, t, s):

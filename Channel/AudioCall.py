@@ -20,14 +20,14 @@ class AudioStream(object):
 class AudioCall(object):
     """Maneja las instancias de pyAudio"""
     CONTINUE = pyaudio.paContinue
-    PA = pyaudio.PyAudio()
-    OUTPUT = None
 
     def __init__(self):
         super(AudioCall, self).__init__()
+        self.pa = pyaudio.PyAudio()
+        self.stream = None
 
     def record(self, callback):
-        stream = AudioCall.PA.open(format=AudioCall.PA.get_format_from_width(Constants.WIDTH),
+        stream = self.pa.open(format=self.pa.get_format_from_width(Constants.WIDTH),
                     channels=Constants.CHANNELS,
                     rate=Constants.RATE,
                     input=True,
@@ -38,16 +38,12 @@ class AudioCall(object):
 
         return AudioStream(stream, thread_record)
 
-    @staticmethod
-    def openOutput():
-        if AudioCall.OUTPUT is not None:
-            return
+    def openOutput(self):
+        self.stream = self.pa.open(format=self.pa.get_format_from_width(Constants.WIDTH),
+                            channels=Constants.CHANNELS,
+                            rate=Constants.RATE,
+                            output=True)
 
-        # OUTPUT = AudioCall.PA.open(format=AudioCall.PA.get_format_from_width(Constants.WIDTH),
-        #                     channels=Constants.CHANNELS,
-        #                     rate=Constants.RATE,
-        #                     output=True)
-
-    @staticmethod
-    def closeOutput():
-        pass
+    def closeOutput(self):
+        self.stream.stop_stream()
+        self.stream.close()
