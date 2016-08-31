@@ -1,6 +1,6 @@
 # Redes2017
 
-## Práctica 2
+## Práctica 3
 
 **Integrantes**
 
@@ -10,32 +10,27 @@
 
 ### Reporte
 
-**1.- Definir el concepto de procedimientos remotos**
+**1.- ¿Si le pasas el proyecto a alguien que se encuentre al otro lado del mundo, podrían comunicarse?**
 
-Consisten en un protocolo que permite a un software o programa ejecutar código en otra máquina remota sin preocuparse por la comunicación ocultando todos los detalles del código correspondiente a la comunicación a través de la red.
+Siempre y cuando las computadoras tengan acceso remoto entre ellas, podrían comunicarse
 
-**2.- ¿Qué es una IP y para qué sirve?**
+**2.- ¿Bajo que restricciones podrían comunicarse?**
 
-El protocolo de internet (Internet Protocol) es un protocolo de comunicación de datos digitales clasificado funcionalmente en la capa de red (capa que proporciona conectividad y selección de ruta entre dos sistemas de hosts que pueden estar ubicados en redes geográficamente distintas.)
-Es utilizado para la comunicación de datos a través de una red de paquetes combinados.
+Cuando ambas tienen una IP fija a la cuál contactar (de otro modo, está enmascarada bajo la red local y no podrían conectarse entre ellas)
 
-**3.- ¿Qué es un puerto?**
+**3.-**
 
-Éste especifica la aplicación a la que se dirigen los datos, así, cuando el equipo recibe información que va dirigida a un puerto, los datos se envían a la aplicación relacionada. Si se trata de una solicitud enviada a la aplicación, la aplicación se denomina aplicación servidor. Si se trata de una respuesta, entonces hablamos de una aplicación cliente.
+Se pueden comunicar pues están en la misma red local.. se asignan IP bajo el módem y podrían entablar comunicación; para poder comunicarse tendrían que estar conectados a la misma red (o se vuelve el caso anterior)
 
-**4.- ¿Se puede tener dos clientes en una misma computadora?**
-
-Sí
-
-**5.- Particularidades del código**
+**4.- Particularidades del código**
 * Flujo del problema.
-  En la carpeta GUI sólo se tienen los archivos referentes a la especificación de las pantallas.
-  El archivo *Chat.py* contiene la definición de los controladores de las interfaces, se definen los métodos para responder ante los eventos de conexión y envío de mensajes. Para ello, se tiene asociada una instancia de *MyApiClient* que a su vez maneja una instancia de *Channel* a través de la cuál se manejan las conexiones.
-  *MyApiClient* sirve como intermedio entre la GUI y el servidor local, a través de él se realizan los diferentes procesos mientras que *MyApiServer* sólo define las funciones disponibles para el contacto.
-* Principales problemas que se encontraron y cómo los solucionaron
-  Principalmente fue el manejo de la estructura de clases dada, pues no hallábamos como interconectar las piezas. (Para ello seguimos la documentación y envíamos correos)
-* Problemas que no fueron solucionados.
-  En la GUI.. los mensajes enviados no tienen el formato que esperábamos. En general, nos apegamos  a la documentación e implementamos los métodos de forma que (al menos para nosotros) tuviera sentido.
+  Se mantuvieron las definiciones de clase de la práctica 2, agregando al server la función para manejar la entrada del audio. Se crea la clase *AudioCall* para manejar una sola instancia de pyAudio.
+
+  Un problema fue la sincronización de los hilos, pues al grabar se envían los bytes continuamente (y si se reproducen ahí mismo, la comunicación es perfecta) sin embargo, al enviarlos por la red el servidor de alguna forma tiene que reproducir esos bytes (pero está en otro hilo) lo que nos ocasionó problemas pues no reproducía bien la llamada. (Problema sigue sin resolverse por completo).
+
+  Por otra parte, para que al recibir audio el contacto pueda reproducirlo, se tiene que tener el *stream* abierto.. pero tendría que haber notificación de que debe abrirse (al abrir y cerrarlo a cada llamada, dejaba de reproducir y si no se cierra, eventualmente hay una excepción). La solución temporal fue dejar el *stream* abierto desde el inicio y cerrarlo al finalizar la aplicación.
+
+  Al botón de llamada en lugar de lanzar otra pantalla, se actualiza con la opción de colgar.
 
 ### Dependencias
 * Python 3
@@ -45,7 +40,7 @@ Uso:
 
 * Para uso local
 
-*python3 GraphicalUserInterface.py -- -l* 
+*python3 GraphicalUserInterface.py -- -l*
 
 * Para uso remoto
 
