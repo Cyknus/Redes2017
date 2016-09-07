@@ -13,6 +13,7 @@ from .ikivy import MyLabel
 
 from Channel.Channel import Channel
 from Constants.Constants import *
+from Constants import *
 from Channel.AudioCall import *
 
 Window.clearcolor = Constants.RGBA_BG
@@ -21,7 +22,7 @@ Window.clearcolor = Constants.RGBA_BG
 Builder.load_file('GUI/screens.kv')
 # Instanciar manejador..
 pa = AudioCall()
-pa.openOutput() # TODO modularizar esto para no tener el stream abierto todo el tiempo..
+pa.openOutput() # TODO modularizar esto para no tener el stream abierto todo el tiempo.. => se mueve a otra pantalla
 
 class LocalLoginScreen(Screen):
     def accessRequest(self, my_port, contact_port):
@@ -69,8 +70,8 @@ class ChatScreen(Screen):
             msg = MyLabel(text=text, color=RGB_SEND)
         except Exception as e:
             print(e)
-            msg = MyLabel(text=text, color=RGB_NSEND)
             print("Mensaje no ha podido ser enviado.")
+            msg = MyLabel(text=text, color=RGB_NSEND)
 
         self.ids.layout.add_widget(msg)
         # limpiar lo que está escrito
