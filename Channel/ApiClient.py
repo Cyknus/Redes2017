@@ -8,7 +8,6 @@ from GUI.ikivy import MyLabel
 class MyApiClient:
     def  __init__(self):
         """ Constructor de la clase. """
-        self.channel = Channel() # canal de comunicación
 
         # GUI
         self.display = None # donde se agregarán los mensajes

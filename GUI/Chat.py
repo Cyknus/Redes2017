@@ -1,5 +1,8 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
+import gi
+
+gi.require_version('Gtk', '3.0')
 
 from kivy.app import App
 from kivy.lang import Builder
@@ -9,6 +12,7 @@ from kivy.core.window import Window
 
 from .ikivy import MyLabel
 
+from Channel.Channel import Channel
 from Channel.ApiClient import MyApiClient
 from Constants import *
 
@@ -19,44 +23,45 @@ Builder.load_file('GUI/screens.kv')
 # Para manejar las pantallas
 sm = ScreenManager()
 # El cliente que se levanta
+channel = Channel()
 client = MyApiClient()
 
 class LocalLoginScreen(Screen):
     def accessRequest(self, my_port, contact_port):
         """ Ingreso de modo local """
         try:
-            client.channel.connect_to(contact_port=contact_port)
-            client.channel.server_up(client, my_port)
+            channel.connect_to(contact_port=contact_port)
+            channel.server_up(client, my_port)
             print("Conexión establecida entre " + str(my_port) + " hacia " + str(contact_port))
 
             # lanzar la siguiente ventana
             sm.current = "chat"
             Window.size = Constants.CHAT_SIZE
         except Exception as e:
-            if client.channel.server is not None:
-                client.channel.server_down()
+            if channel.server is not None:
+                channel.server_down()
             print("No se ha podido establecer una conexión. Intenta de nuevo.")
 
 class RemoteLoginScreen(Screen):
     def accessRequest(self, contact_ip):
         """ Ingreso de modo remoto """
         try:
-            client.connect_to(contact_ip=contact_ip)
-            client.server_up(client)
+            connect_to(contact_ip=contact_ip)
+            server_up(client)
             print("Conexión establecida hacia " + str(contact_ip))
 
 	        # lanzar la siguiente ventana
             sm.current = "chat"
             Window.size = Constants.CHAT_SIZE
         except Exception as e:
-            if client.channel.server is not None:
-                client.channel.server_down()
+            if channel.server is not None:
+                channel.server_down()
             print("No se ha podido establecer una conexión. Intenta de nuevo")
 
 class ChatScreen(Screen):
     def send(self, text):
         try:
-            client.channel.send_text(text)
+            channel.send_text(text)
             # aquí tiene que aparecer en pantalla el último enviado
             msg = MyLabel(text=text, color=Constants.RGB_SEND)
         except Exception as e:
@@ -73,8 +78,8 @@ class ChatApp(App):
         return sm
 
     def on_stop(self):
-        if client.channel.server is not None:
-            client.channel.server_down()
+        if channel.server is not None:
+            channel.server_down()
 
 # acoplar todo
 def build_screen_manager(local):

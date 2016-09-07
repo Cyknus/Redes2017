@@ -41,6 +41,8 @@ Sí
 * Python 3
 * Kivy 1.9
 
+Es necesario instalar todas las dependencias de fuentes (pip install kivy) debería funcionar.
+
 Uso:
 
 * Para uso local
