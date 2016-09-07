@@ -46,8 +46,8 @@ class RemoteLoginScreen(Screen):
     def accessRequest(self, contact_ip):
         """ Ingreso de modo remoto """
         try:
-            connect_to(contact_ip=contact_ip)
-            server_up(client)
+            channel.connect_to(contact_ip=contact_ip)
+            channel.server_up(client)
             print("Conexión establecida hacia " + str(contact_ip))
 
 	        # lanzar la siguiente ventana
