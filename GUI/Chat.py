@@ -10,6 +10,8 @@ from kivy.core.window import Window
 from .ikivy import MyLabel
 
 from Channel.ApiClient import MyApiClient
+from Channel.Channel import Channel
+
 from Constants import *
 
 from Channel.AudioCall import *
@@ -22,41 +24,42 @@ Builder.load_file('GUI/screens.kv')
 sm = ScreenManager()
 # El cliente que se levanta
 client = MyApiClient()
+channel = Channel()
 # Sólo una instancia de pyAudio
 pa = AudioCall()
-pa.openOutput() # TODO modularizar esto para no tener el stream abierto todo el tiempo..
+pa.openOutput() # TODO modularizar esto para no tener el stream abierto todo el tiempo.. => se mueve a otra pantalla
 
 class LocalLoginScreen(Screen):
     def accessRequest(self, my_port, contact_port):
         """ Ingreso de modo local """
         print("Estableciendo conexión..")
         try:
-            client.channel.connect_to(contact_port=contact_port)
-            client.channel.server_up(client, my_port)
+            channel.connect_to(contact_port=contact_port)
+            channel.server_up(client, my_port)
             print("Conexión establecida entre " + str(my_port) + " hacia " + str(contact_port))
 
             # lanzar la siguiente ventana
             sm.current = "chat"
             Window.size = Constants.CHAT_SIZE
         except Exception as e:
-            if client.channel.server is not None:
-                client.channel.server_down()
+            if channel.server is not None:
+                channel.server_down()
             print("No se ha podido establecer una conexión. Intenta de nuevo.")
 
 class RemoteLoginScreen(Screen):
     def accessRequest(self, contact_ip):
         """ Ingreso de modo remoto """
         try:
-            client.connect_to(contact_ip=contact_ip)
-            client.server_up(client)
+            channel.connect_to(contact_ip=contact_ip)
+            channel.server_up(client)
             print("Conexión establecida hacia " + str(contact_ip))
 
 	        # lanzar la siguiente ventana
             sm.current = "chat"
             Window.size = Constants.CHAT_SIZE
         except Exception as e:
-            if client.channel.server is not None:
-                client.channel.server_down()
+            if channel.server is not None:
+                channel.server_down()
             print("No se ha podido establecer una conexión. Intenta de nuevo")
 
 class ChatScreen(Screen):
@@ -69,7 +72,7 @@ class ChatScreen(Screen):
             return
 
         try:
-            client.channel.send_text(text)
+            channel.send_text(text)
             # aquí tiene que aparecer en pantalla el último enviado
             msg = MyLabel(text=text, color=Constants.RGB_SEND)
         except Exception as e:
@@ -96,7 +99,7 @@ class ChatScreen(Screen):
 
 # mientras vemos a donde moverla..
 def callback(in_data, f, t, s):
-    client.channel.send_bytes(in_data) # TODO mandarlo a otro hilo, se está rezagando el cómo llegan los datos
+    channel.send_bytes(in_data) # TODO mandarlo a otro hilo, se está rezagando el cómo llegan los datos
 
     return (None, AudioCall.CONTINUE) # continuar grabando
 
@@ -107,8 +110,8 @@ class ChatApp(App):
 
     def on_stop(self):
         pa.closeOutput()
-        if client.channel.server is not None:
-            client.channel.server_down()
+        if channel.server is not None:
+            channel.server_down()
 
 # acoplar todo
 def build_screen_manager(local):
