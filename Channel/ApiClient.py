@@ -12,6 +12,3 @@ class MyApiClient:
             contact_server = ServerProxy('http://%s:%i'%(get_ip_address(), int(contact_port)), allow_none=True)
 
         self.proxy = contact_server
-
-    def play(self, audio):
-        self.display.play(audio) # porquenosgustapasaralassiguientesfunciones
