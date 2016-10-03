@@ -16,6 +16,7 @@
 #####################################################
 import socket
 import time
+from Constants.Constants import *
 
 """**************************************************
  Metodo auxiliar que hace uso de internet para
@@ -30,3 +31,12 @@ def get_ip_address():
 def dummy_run(arg, **kwargs):
     while arg():
         time.sleep(0.1)
+
+""" Funcion que construira el header del mensaje a mandar """
+def get_message_header(username, ip):
+    return username+':'+ip+':'
+
+def split_message_header(message):
+    message_split = message.split(':')
+    message_text = ':'.join(message_split[MESSAGE_TEXT:])
+    return (message_split[MESSAGE_USERNAME], message_split[MESSAGE_IP], message_text)

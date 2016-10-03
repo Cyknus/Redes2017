@@ -1,21 +1,12 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-from Constants import *
-from .Channel import Channel
-from GUI.ikivy import MyLabel
+from xmlrpc.client import ServerProxy
+from Constants.Constants import *
+from Constants.AuxiliarFunctions import get_ip_address
+
+LOCALHOST = get_ip_address()
 
 class MyApiClient:
-    def  __init__(self):
-        """ Constructor de la clase. """
-        self.channel = Channel() # canal de comunicación
-
-        # GUI
-        self.display = None # Ligar la pantalla del chat
-        self.stream = None # sonido de llamada entrante
-
-    def receive(self, message):
-        """ Notifica en pantalla el mensaje recibido """
-        # mostrar en pantalla el mensaje recibido
-        msg = MyLabel(text=message, color=Constants.RGB_RECD)
-        self.display.ids.layout.add_widget(msg)
+    def __init__(self, contact_ip=LOCALHOST, contact_port=CHAT_PORT):
+        self.proxy = ServerProxy('http://%s:%i'%(contact_ip, int(contact_port)), allow_none=True)

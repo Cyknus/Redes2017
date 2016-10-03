@@ -17,9 +17,13 @@
 # Distributed under terms of the MIT license.       #
 #####################################################
 
-from ApiServer import *
-from ApiClient import *
+from Channel.ApiServer import *
+from Channel.ApiClient import *
 from threading import Thread
+from xmlrpc.client import ProtocolError
+from Constants.Constants import *
+
+LOCALHOST = get_ip_address()
 
 """**************************************************
 Las instancias de esta clase contendran los metodos
@@ -37,29 +41,44 @@ class RequestChannel():
     @param <int> contact_port: De trabajar de manera local
                 representa el puerto de la instancia del contacto
     **************************************************"""
-    def __init__(self, header, contact_ip = None, contact_port = None):
-        self.api_client = ApiClient(header, contact_ip, contact_port)
+    def __init__(self, contact_ip=LOCALHOST, contact_port=CHAT_PORT):
+        self.api_client = MyApiClient(contact_ip, contact_port)
+        self.contact_ip = contact_ip
+        self.contact_port = contact_port
 
     """**************************************************
     Metodo que se encarga de mandar texto al contacto con
     el cual se estableció la conexion
     **************************************************"""
     def send_text(self, text):
-        self.api_client.send_text(text)
+        try:
+            print("[info] Sending message to " + self.contact_ip)
+            res = self.api_client.proxy.send_message_wrapper(text)
+            if res["status"] == ERROR:
+                raise Exception(res["detailedInfo"])
+            return res["detailedInfo"]
+        except ProtocolError as err:
+            raise RuntimeError("Can't get response from " + self.contact_ip)
+
 
     """**************************************************
     Metodo que se encarga de mandar iniciar una conversacion
     con un nuevo contacto
     **************************************************"""
     def new_connection(self, my_ip, my_port, username):
-        self.api_client.new_chat_wrapper(my_ip, my_port, username)
+        try:
+            print("[info] Calling api..")
+            res = self.api_client.proxy.new_chat_wrapper(my_ip, my_port, username)
+            return res["detailedInfo"]
+        except ProtocolError as err:
+            raise RuntimeError("Can't connect with " + username)
 
     """**************************************************
     Metodo que se encarga de mandar audio y video al contacto
     con el cual se estableció la conexion
     **************************************************"""
     def begin_call(self):
-        #TODO
+        pass
 
     """**************************************************
     Metodos Get
@@ -69,13 +88,13 @@ class RequestChannel():
 
 
 class BidirectionalChannel(RequestChannel):
-    def __init__(self, gui_parent, contact_ip = None,  contact_port = None,my_port = None):
+    def __init__(self, gui_parent, contact_ip=None, contact_port=None, my_port=None):
         if my_port and contact_port:
-            self.api_client = ApiClient(contact_port= contact_port)
-            self.api_server = ApiServer(gui_parent, my_port)
+            self.api_client = MyApiClient(contact_port=contact_port)
+            self.api_server = MyApiServer(gui_parent, my_port)
         elif contact_ip:
-            self.api_client = ApiClient(contact_ip= contact_ip)
-            self.api_server = ApiServer(gui_parent)
+            self.api_client = MyApiClient(contact_ip= contact_ip)
+            self.api_server = MyApiServer(gui_parent)
         else:
             raise ValueError('The values of fields are not consistent BidirectionalChannel.__init__')
 
