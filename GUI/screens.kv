@@ -204,7 +204,7 @@
             size_hint: 1, 0.7
         Button:
             text: 'Enviar'
-            on_press: root.send_message(new_message.text)
+            on_press: root.send_message(new_message.text.strip()) if new_message.text.strip() != '' else print("Empty message")
             size_hint: 1, 0.1
             background_color: (0.43, 0.87, 0.82, 1.0)
 

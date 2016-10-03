@@ -89,6 +89,7 @@ class FunctionWrapper:
         contact_ip = message_split[MESSAGE_IP]
         text = message_split[MESSAGE_TEXT]
         print("[info] New message from " + contact_username)
+        print(message)
 
         if contact_username in self.chats_dictionary:
             self.gui_parent.current_screen.entry_message(contact_username, contact_ip, text)
