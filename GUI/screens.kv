@@ -204,7 +204,7 @@
             size_hint: 1, 0.7
         Button:
             text: 'Enviar'
-            on_press: root.send_message(new_message.text.strip()) if new_message.text.strip() != '' else print("Empty message")
+            on_press: root.send_message(new_message.text.strip())
             size_hint: 1, 0.1
             background_color: (0.43, 0.87, 0.82, 1.0)
 
@@ -259,7 +259,7 @@
             size_hint: .84, .11
             pos_hint: {'x':.005, 'y':.005}
         Button:
-            on_press: root.send(block_of_typos.text) if block_of_typos.text != '' else print("No message to send")
+            on_press: root.send(block_of_typos.text.strip()) if block_of_typos.text.strip() != '' else print("No message to send")
             size_hint: .14, .11
             pos_hint: {'x': .85, 'y': .005}
             background_color: (0, 0, 0, 0)
