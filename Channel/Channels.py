@@ -53,6 +53,7 @@ class RequestChannel():
     def send_text(self, text):
         try:
             print("[info] Sending message to " + self.contact_ip)
+            print(text)
             res = self.api_client.proxy.send_message_wrapper(text)
             if res["status"] == ERROR:
                 raise Exception(res["detailedInfo"])
