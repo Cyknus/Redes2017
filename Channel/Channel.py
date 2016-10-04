@@ -11,5 +11,5 @@ class Channel:
         self.api_client = MyApiClient(contact_ip, contact_port)
 
     def send_text(self, text):
-        self.api_client.proxy.sendMessage_wrapper(text)
-        
+        res = self.api_client.proxy.sendMessage_wrapper(text)
+        print("Contact response " + res)

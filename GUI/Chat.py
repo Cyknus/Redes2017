@@ -59,6 +59,7 @@ class ChatScreen(Screen):
             # aquí tiene que aparecer en pantalla el último enviado
             msg = MyLabel(text=text, color=RGB_SEND)
         except Exception as e:
+            print(e)
             msg = MyLabel(text=text, color=RGB_NSEND)
             print("Mensaje no ha podido ser enviado.")
 

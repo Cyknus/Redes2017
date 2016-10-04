@@ -29,3 +29,4 @@ class FunctionWrapper:
 
     def sendMessage_wrapper(self, message):
         self.gui.current_screen.display_message(message)
+        return "OK"
