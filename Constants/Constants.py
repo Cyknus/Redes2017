@@ -37,3 +37,4 @@ PORT_CONTACT = 'port_contact'
 # code status
 OK = 200
 ERROR = 500
+AUDIO = 'AudioCall'

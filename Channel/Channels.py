@@ -78,8 +78,22 @@ class RequestChannel():
     Metodo que se encarga de mandar audio y video al contacto
     con el cual se estableció la conexion
     **************************************************"""
-    def begin_call(self):
-        pass
+    def begin_call(self, call):
+        try:
+            print("[info] Call: " + call)
+            res = self.api_client.proxy.new_call_wrapper(call)
+            return res["detailedInfo"]
+        except ProtocolError as err:
+            raise RuntimeError("Can't begin call with " + self.contact_ip)
+
+    def send_bytes(self, data):
+        try:
+            print("[info] Streaming..")
+            res = self.api_client.proxy.play_audio_wrapper(data)
+            # Handle error from playing the other side
+            return res["detailedInfo"]
+        except ProtocolError as err:
+            raise RuntimeError("Can't send bytes")
 
     """**************************************************
     Metodos Get

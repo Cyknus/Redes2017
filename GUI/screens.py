@@ -8,12 +8,15 @@ from kivy.core.window import Window
 from kivy.uix.listview import ListView, ListItemButton
 from kivy.adapters.listadapter import ListAdapter
 from kivy.uix.modalview import ModalView
-from .ikivy import *
 from kivy.clock import mainthread
+from kivy.uix.boxlayout import BoxLayout
+from .ikivy import *
 from Constants.Constants import *
 from Constants.AuxiliarFunctions import *
 from Channel.DirectoryChannel import DirectoryChannel
 from Channel.Channels import RequestChannel
+from Channel.AudioCall import *
+import multiprocessing as mp
 
 Window.clearcolor = RGBA_BG
 Builder.load_file('GUI/screens.kv')
@@ -207,6 +210,12 @@ class MainScreen(Screen):
         chat = self.ids.sm_chats.current_screen
         chat.draw_text_case(text, RECD)
 
+    @mainthread
+    def entry_audio_call(self, username, ip_address):
+        print("[info] Creating streams")
+        screen = self.ids.sm_chats.get_screen(username)
+        screen.open_audio_call()
+
 class LogoutScreen(Screen):
     pass
 
@@ -233,7 +242,13 @@ class ChatScreen(Screen):
         pass
 
     def audio_call(self):
-        pass
+        try:
+            res = self.channel.begin_call(self.header + AUDIO)
+            print("Contact response " + res)
+            self.open_audio_call()
+        except Exception as e:
+            print(e)
+            print("Can't create call")
 
     def draw_text(self, text, color, halign):
         width = self.ids.messages.container.width - 10
@@ -247,9 +262,32 @@ class ChatScreen(Screen):
             self.draw_text(text, RGB_RECD, 'left')
         else:
             self.draw_text(text, RGB_NSEND, 'right')
-class AudioScreen(Screen):
+
+    def open_audio_call(self):
+        print("opening panel..")
+        x = AudioWidget(self.channel)
+        self.ids.actions_buttons.add_widget(x)
+
+class AudioWidget(BoxLayout):
+    def __init__(self, channel, **kwargs):
+        super(AudioWidget, self).__init__(**kwargs)
+        # self.pa_call = AudioCall()
+        # self.pa_call.openOutput()
+        # self.pa_call.record(self.callback_audio)
+        self.channel = channel
+
     def hang_up(self):
-        pass
+        # self.pa_call.stopOutput()
+        # self.pa_call.stop()
+        self.parent.remove_widget(self)
+
+    def callback_audio(self, in_data, f, t, s):
+        self.channel.send_bytes(in_data)
+        return (None, AudioCall.CONTINUE)
+
+    @mainthread
+    def play_audio(self, audio):
+        self.pa_call.play(audio)
 
 class ChatApp(App):
     def __init__(self, local_mode):

@@ -111,8 +111,8 @@ class FunctionWrapper:
     por el cliente con el que estamos hablando, debe de
     hacer lo necesario para reproducir el audio
     ************************************************** """
-    def play_audio_wrapper(self,audio):
-        pass
+    def play_audio_wrapper(self,audio): # TODO decorator for entry message?
+        self.gui_parent.current_screen.play_audio(audio.data)
 
     """ **************************************************
     Procedimiento que ofrece nuestro servidor, este metodo sera llamado
@@ -121,3 +121,15 @@ class FunctionWrapper:
     ************************************************** """
     def play_video_wrapper(self,frame):
         pass
+
+    def new_call_wrapper(self, type):
+        txt_split = split_message_header(type)
+        contact_username = txt_split[MESSAGE_USERNAME]
+        contact_ip = txt_split[MESSAGE_IP]
+        typo = txt_split[MESSAGE_TEXT]
+        # TODO check if active
+        if typo == AUDIO:
+            print("New AudioCall from " + contact_username)
+            self.gui_parent.current_screen.entry_audio_call(contact_username, contact_ip)
+            return {"status": OK, "detailedInfo": "Stream ready"}
+        return {"status": ERROR, "detailedInfo": "Unrecognized operation"}

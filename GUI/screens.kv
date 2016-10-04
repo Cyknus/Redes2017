@@ -111,11 +111,9 @@
             on_press: username.text=''
             size_hint: .3, .4
 
-<AudioScreen>:
+<AudioWidget>:
     BoxLayout:
-        Label:
-            id: contact_username
-            text: "Llamando..."
+        orientation: 'horizontal'
         Button:
             text: 'Colgar'
             on_press: root.hang_up()
@@ -211,6 +209,7 @@
 <ChatScreen>:
     FloatLayout:
         BoxLayout:
+            id: actions_buttons
             orientation: 'horizontal'
             size_hint: 1, .1
             pos_hint: {'x': 0, 'y': .9}
