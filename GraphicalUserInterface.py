@@ -23,7 +23,7 @@
 # Ejecución: python3 GraphicalUserInterface.py -- [args] #                                                    #
 ##########################################################
 import sys, getopt
-from GUI.Chat import build_screen_manager
+from GUI.Chat import ChatApp
 
 # **************************************************
 #  Definicion de la funcion principal
@@ -39,7 +39,7 @@ def main(argv):
     else:
         local = False
 
-    app = build_screen_manager(local)
+    app = ChatApp(local)
     app.run()
 
 if __name__ == '__main__':
