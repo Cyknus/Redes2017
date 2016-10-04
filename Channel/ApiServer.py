@@ -31,7 +31,7 @@ class FunctionWrapper:
     def sendMessage_wrapper(self, message):
         self.gui.current_screen.display_message(message)
         return "OK"
-        
-    def listen(self, d):
-        self.gui.current_screen.listen_audio(d)
+
+    def sendAudio_wrapper(self, d):
+        self.gui.current_screen.listen_audio(d.data)
         return "OK"

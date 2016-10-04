@@ -28,5 +28,9 @@ def get_ip_address():
     return "%s"% (s.getsockname()[0])
 
 def dummy_run(arg, **kwargs):
-    while arg():
-        time.sleep(0.1)
+    try:
+        while arg():
+            time.sleep(0.1)
+    except Exception as e:
+        print("Hilo terminado")
+        return

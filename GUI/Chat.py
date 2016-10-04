@@ -20,9 +20,6 @@ Window.clearcolor = Constants.RGBA_BG
 
 # Descripción de las ventanas
 Builder.load_file('GUI/screens.kv')
-# Instanciar manejador..
-pa = AudioCall()
-pa.openOutput() # TODO modularizar esto para no tener el stream abierto todo el tiempo.. => se mueve a otra pantalla
 
 class LocalLoginScreen(Screen):
     def accessRequest(self, my_port, contact_port):
@@ -59,8 +56,11 @@ class ChatScreen(Screen):
         self.ids.layout.bind(minimum_height=self.ids.layout.setter('height'))
         self.channel = channel
         self.stream_record = None
+        self.pa_call = AudioCall()
+        self.pa_call.openOutput() # se deja abierto siempre para garantizar que el contacto escuche
 
     def send(self, text):
+        text = text.strip()
         if text == '':
             return
 
@@ -87,9 +87,7 @@ class ChatScreen(Screen):
             print("Llamando..")
             self.ids.call_button.text = 'Colgar'
             # abre el stream para grabar e inicia el thread que lo maneja
-            self.stream_record = pa.record(ChatScreen.callback)
-            # abrir stream para escuchar
-            #AudioCall.openOutput()
+            self.stream_record = self.pa_call.record(self.callback)
         else:
             print("Colgando..")
             self.ids.call_button.text = "Llamar"
@@ -98,18 +96,16 @@ class ChatScreen(Screen):
             # Actualizar bandera
             self.stream_record = None
 
-    def play(self, audio):
-        pa.openOutput()
-        pa.stream.write(audio)
-        pa.closeOutput()
+    @mainthread
+    def listen_audio(self, audio):
+        self.pa_call.play(audio)
 
-    @staticmethod
-    def callback(in_data, f, t, s):
+    def callback(self, in_data, f, t, s):
         try:
-            client.channel.send_bytes(in_data)
+            self.channel.send_bytes(in_data)
         except Exception as e:
             print(e)
-            print("No se ha podido enviar audio")
+            print("No se ha podido enviar fragmento de audio..")
         return (None, AudioCall.CONTINUE)
 
 class ChatApp(App):
@@ -131,4 +127,6 @@ class ChatApp(App):
         screen = self.sm.current_screen
         if type(screen) is ChatScreen:
             screen.channel.api_server.stop()
-        pa.closeOutput()
+            screen.pa_call.closeOutput()
+            if screen.stream_record:
+                screen.stream_record.stop()

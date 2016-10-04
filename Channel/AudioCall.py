@@ -6,15 +6,14 @@ import pyaudio
 
 class AudioStream(object):
     """Maneja la llamada"""
-    def __init__(self, stream, thread):
+    def __init__(self, stream):
         super(AudioStream, self).__init__()
         self.stream = stream
-        self.thread = thread
 
     def stop(self):
+        print("Terminando hilo.. mensajes en cola pueden no ser enviados..")
         self.stream.stop_stream()
         self.stream.close()
-        self.thread.join()
 
 
 class AudioCall(object):
@@ -36,7 +35,7 @@ class AudioCall(object):
         thread_record = Thread(target=AuxiliarFunctions.dummy_run, args=(stream.is_active,))
         thread_record.start()
 
-        return AudioStream(stream, thread_record)
+        return AudioStream(stream)
 
     def openOutput(self):
         self.stream = self.pa.open(format=self.pa.get_format_from_width(Constants.WIDTH),
@@ -47,3 +46,6 @@ class AudioCall(object):
     def closeOutput(self):
         self.stream.stop_stream()
         self.stream.close()
+
+    def play(self, audio):
+        self.stream.write(audio)
