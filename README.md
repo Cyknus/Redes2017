@@ -24,26 +24,27 @@ Se pueden comunicar pues están en la misma red local.. se asignan IP bajo el m�
 
 **4.- Particularidades del código**
 * Flujo del problema.
-  Se mantuvieron las definiciones de clase de la práctica 2, agregando al server la función para manejar la entrada del audio. Se crea la clase *AudioCall* para manejar una sola instancia de pyAudio.
+  Se mantuvieron las definiciones de clase de la práctica 2, agregando al server la función para manejar la entrada del audio. Se crea la clase ``AudioCall`` para manejar una sola instancia de pyAudio así como el hilo que se lanza al empezar a grabar.
 
-  Un problema fue la sincronización de los hilos, pues al grabar se envían los bytes continuamente (y si se reproducen ahí mismo, la comunicación es perfecta) sin embargo, al enviarlos por la red el servidor de alguna forma tiene que reproducir esos bytes (pero está en otro hilo) lo que nos ocasionó problemas pues no reproducía bien la llamada. (Problema sigue sin resolverse por completo).
+  Un problema fue la sincronización de los hilos, pues al grabar se envían los bytes continuamente y el servidor de alguna forma tiene que reproducir esos bytes (pero está en otro hilo, pues está a la escucha de mensajes) lo que nos ocasionó problemas pues no reproducía bien la llamada. Se usa un *decorator* que ofrece kivy: ``mainthread`` para que el hilo del servidor pueda comunicarse con la interfaz y reproducir el audio.
 
-  Por otra parte, para que al recibir audio el contacto pueda reproducirlo, se tiene que tener el *stream* abierto.. pero tendría que haber notificación de que debe abrirse (al abrir y cerrarlo a cada llamada, dejaba de reproducir y si no se cierra, eventualmente hay una excepción). La solución temporal fue dejar el *stream* abierto desde el inicio y cerrarlo al finalizar la aplicación.
+  Por otra parte, para que al recibir audio el contacto pueda reproducirlo, se tiene que tener el *stream* abierto.. pero tendría que haber notificación de que debe abrirse.. abriendo y cerrando continuamente nos lanzaba una excepción extraña.. la solución temporal fue dejar el *stream* abierto desde el inicio y cerrarlo al finalizar la aplicación.
 
   Al botón de llamada en lugar de lanzar otra pantalla, se actualiza con la opción de colgar.
 
 ### Dependencias
 * Python 3
 * Kivy 1.9
+* PyAudio
 
-Es necesario instalar todas las dependencias de fuentes (pip install kivy) debería funcionar.
+Es necesario instalar todas las dependencias de fuentes (``pip install kivy``) debería funcionar.
 
 Uso:
 
 * Para uso local
 
-*python3 GraphicalUserInterface.py -- -l*
+``python3 GraphicalUserInterface.py -- -l``
 
 * Para uso remoto
 
-*python3 GraphicalUserInterface.py --*
+``python3 GraphicalUserInterface.py --``
