@@ -19,45 +19,61 @@ from xmlrpc.server import SimpleXMLRPCRequestHandler
 from Constants.AuxiliarFunctions import *
 from Constants.Constants import *
 import threading
+import logging
 
-LOCALHOST = get_ip_address()
+# Format responses
+def build_response(func):
+    def format_response(status, string_message):
+        return {"status": status, "message": string_message}
+    return format_response
 
 # Restrict to a particular path.
 class RequestHandler(SimpleXMLRPCRequestHandler):
     rpc_paths = ('/RPC2',)
 
-"""**************************************************
-Clase que genera un servidor de la biblioteca xmlrpc
-con el cual el cliente expondrá los metodos que ofrece
-@param gui_parent - Elemento gráfico por el que se
-            muestran mensajes recibidos, etc.
-@param my_port - Puerto donde se levanta el server
-            si ninguno se especifica, se usa el default
-**************************************************"""
 class MyApiServer:
-    def __init__(self, gui_parent, my_port=None):
-        self.port = int(my_port) if my_port else CHAT_PORT
-        self.ip = LOCALHOST
-        # configurar el servidor
+    """
+        Representa el servidor del usuario. A través de este
+        el usuario recibe mensajes de sus contactos.
+
+        @param gui_parent - elemento al que se notifican los mensajes
+                            es una instancia de la GUI con métodos:
+                                entry_message
+                                entry_connection
+                                entry_audio_call
+        @param my_port - el puerto en el que se levanta el servidor
+                         por defecto es: CHAT_PORT (5000)
+    """
+    def __init__(self, gui_parent, my_port=CHAT_PORT):
+        self.port = int(my_port)
+        self.ip = get_ip_address()
         self.chats_dictionary = {}
+        # configurar el servidor
         wrapper = FunctionWrapper(gui_parent, self.chats_dictionary)
         self.server = SimpleXMLRPCServer((self.ip, self.port), requestHandler=RequestHandler)
         self.server.register_introspection_functions()
-        self.server.register_multicall_functions()
         self.server.register_instance(wrapper)
+        # set logger '%(asctime)s %(name)-12s %(levelname)-8s %(message)s
+        handler = logging.StreamHandler()
+        formatter = logging.Formatter('[%(levelname)s] %(name)-12s %(asctime)s :: %(message)s')
+        handler.setFormatter(formatter)
+        self.logger = logging.getLogger("MyApiServer")
+        self.logger.addHandler(handler)
+        self.logger.setLevel(logging.DEBUG)
 
     def run(self):
-        print("[info] Raising server at " + str(self.ip) + "@" + str(self.port))
+        self.logger.info("Local server running at %s@%d", self.ip, self.port)
         self.server.serve_forever()
 
     def stop(self):
+        self.logger.debug("Shutting down server")
         self.server.shutdown()
         self.server.server_close()
 
     def remove_chat(self, username):
+        self.logger.debug("Drop %s of chats_dictionary", username)
+        self.logger.debug("Current active chats:\n%s", str(chats_dictionary))
         self.chats_dictionary.pop(username)
-        print("[debug] Active chats:")
-        print(self.chats_dictionary)
 
 class FunctionWrapper:
     """ **************************************************

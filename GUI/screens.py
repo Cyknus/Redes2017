@@ -22,7 +22,7 @@ Window.clearcolor = RGBA_BG
 Builder.load_file('GUI/screens.kv')
 
 class LoginManager(Screen):
-    def doLogin(self, server_ip, server_port, my_port=None):
+    def doLogin(self, server_ip, server_port, my_port=CHAT_PORT):
         try:
             print("[info] Linking to server at " + server_ip + "@" + server_port)
             directory = DirectoryChannel(self.manager, server_ip, server_port, my_port)
