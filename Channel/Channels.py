@@ -1,90 +1,69 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-
-#####################################################
-# PURPOSE: Clase que representa la abstracción de   #
-#         Un canal bidireccional, con uso de la     #
-#          biblioteca xmlRpc                        #
-#                                                   #
-# Vilchis Dominguez Miguel Alonso                   #
-#       <mvilchis@ciencias.unam.mx>                 #
-#                                                   #
-# Notes:                                            #
-#                                                   #
-# Copyright   16-08-2015                            #
-#                                                   #
-# Distributed under terms of the MIT license.       #
-#####################################################
-
-from Channel.ApiServer import *
 from Channel.ApiClient import *
+from Channel.ApiServer import *
+from Constants.Constants import *
+from Services.Decorators import try_catch, parse_params
+from Services.Logger import *
 from threading import Thread
 from xmlrpc.client import ProtocolError
-from Constants.Constants import *
 
-LOCALHOST = get_ip_address()
-
-"""**************************************************
-Las instancias de esta clase contendran los metodos
-necesarios para hacer uso de los metodos
-del api de un contacto. Internamente Trabajara
-con una proxy apuntando hacia los servicios del
-servidor xmlrpc del contacto
-**************************************************"""
 class RequestChannel():
-    """**************************************************
-    Constructor de la clase
-    @param <str> contact_ip: Si no se trabaja de manera local
-                representa la ip del contacto con el que se
-                establecera la conexion
-    @param <int> contact_port: De trabajar de manera local
-                representa el puerto de la instancia del contacto
-    **************************************************"""
-    def __init__(self, contact_ip=LOCALHOST, contact_port=CHAT_PORT):
+    """
+        Represents the a one-direction channel
+        It has one proxy pointing to the server
+
+        @param contact_ip - server IP Address
+        @param contact_port - server Port
+    """
+
+    @parse_params
+    def __init__(self, contact_ip, contact_port):
         self.api_client = MyApiClient(contact_ip, contact_port)
         self.contact_ip = contact_ip
         self.contact_port = contact_port
+        self.log = Logger.getFor("RequestChannel")
+        self.log.debug("Initialization complete")
 
-    """**************************************************
-    Metodo que se encarga de mandar texto al contacto con
-    el cual se estableció la conexion
-    **************************************************"""
+    @try_catch
     def send_text(self, text):
-        try:
-            print("[info] Sending message to " + self.contact_ip)
-            print(text)
-            res = self.api_client.proxy.send_message_wrapper(text)
-            if res["status"] == ERROR:
-                raise Exception(res["detailedInfo"])
-            return res["detailedInfo"]
-        except ProtocolError as err:
-            raise RuntimeError("Can't get response from " + self.contact_ip)
+        self.log.debug("Sending message to %s:%d", self.contact_ip, self.contact_port)
 
+        res = self.api_client.proxy.send_message_wrapper(text)
+        if res[STATUS] == ERROR:
+            self.log.error("Request failed: %s", res[MESSAGE])
+            raise ConnectionRefusedError()
+        elif res[STATUS] == OK:
+            self.log.info("Got response: %s", res[MESSAGE])
+            return
 
-    """**************************************************
-    Metodo que se encarga de mandar iniciar una conversacion
-    con un nuevo contacto
-    **************************************************"""
+        raise NotImplementedError()
+
+    @try_catch
     def new_connection(self, my_ip, my_port, username):
-        try:
-            print("[info] Calling api..")
-            res = self.api_client.proxy.new_chat_wrapper(my_ip, my_port, username)
-            return res["detailedInfo"]
-        except ProtocolError as err:
-            raise RuntimeError("Can't connect with " + username)
+        self.log.debug("Creating connection with %s:%d", self.contact_ip, self.contact_port)
 
-    """**************************************************
-    Metodo que se encarga de mandar audio y video al contacto
-    con el cual se estableció la conexion
-    **************************************************"""
+        res = self.api_client.proxy.new_chat_wrapper(my_ip, my_port, username)
+        if res[STATUS] == ERROR:
+            self.log.error("Unexpected response: %s", res[MESSAGE])
+            raise ValueError()
+        elif res[STATUS] == OK:
+            self.log.info("Got response: %s", res[MESSAGE])
+            return
+
+        raise NotImplementedError()
+
+    @try_catch
     def begin_call(self, call):
-        try:
-            print("[info] Call: " + call)
-            res = self.api_client.proxy.new_call_wrapper(call)
-            return res["detailedInfo"]
-        except ProtocolError as err:
-            raise RuntimeError("Can't begin call with " + self.contact_ip)
+        self.log.debug("Beginning call with %s:%d", self.contact_ip, self.contact_port)
+
+        res = self.api_client.proxy.new_call_wrapper(call)
+        if res[STATUS] == ERROR:
+            self.log.error("Unexpected response: %s", res[MESSAGE])
+            raise ValueError()
+        elif res[STATUS] == OK:
+            self.log.debug("")
 
     def send_bytes(self, data):
         try:
@@ -95,9 +74,7 @@ class RequestChannel():
         except ProtocolError as err:
             raise RuntimeError("Can't send bytes")
 
-    """**************************************************
-    Metodos Get
-    **************************************************"""
+    ### Getters
     def get_api_client(self):
         return self.api_client
 

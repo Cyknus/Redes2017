@@ -30,11 +30,15 @@ RATE = 44100
 SERVER_PORT =  7000
 MESSAGE_USERNAME = 0
 MESSAGE_IP = 1
-MESSAGE_TEXT = 2
+MESSAGE_PORT = 2
+MESSAGE_TEXT = 3
 NAME_CONTACT = 'username'
 IP_CONTACT = 'ip_contact'
 PORT_CONTACT = 'port_contact'
+MSG_CONTACT = 'message'
 # code status
+STATUS = "status"
+MESSAGE = "message"
 OK = 200
 ERROR = 500
 AUDIO = 'AudioCall'

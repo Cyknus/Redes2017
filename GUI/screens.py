@@ -1,22 +1,23 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-from kivy.app import App
-from kivy.lang import Builder
-from kivy.uix.screenmanager import ScreenManager, Screen
-from kivy.core.window import Window
-from kivy.uix.listview import ListView, ListItemButton
-from kivy.adapters.listadapter import ListAdapter
-from kivy.uix.modalview import ModalView
-from kivy.clock import mainthread
-from kivy.uix.boxlayout import BoxLayout
 from .ikivy import *
-from Constants.Constants import *
-from Constants.AuxiliarFunctions import *
-from Channel.DirectoryChannel import DirectoryChannel
-from Channel.Channels import RequestChannel
 from Channel.AudioCall import *
+from Channel.Channels import RequestChannel
+from Channel.DirectoryChannel import DirectoryChannel
+from Constants.AuxiliarFunctions import *
+from Constants.Constants import *
+from kivy.adapters.listadapter import ListAdapter
+from kivy.app import App
+from kivy.clock import mainthread
+from kivy.core.window import Window
+from kivy.lang import Builder
+from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.listview import ListView, ListItemButton
+from kivy.uix.modalview import ModalView
+from kivy.uix.screenmanager import ScreenManager, Screen
 import multiprocessing as mp
+
 
 Window.clearcolor = RGBA_BG
 Builder.load_file('GUI/screens.kv')
