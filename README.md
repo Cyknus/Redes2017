@@ -14,11 +14,11 @@
 
 Que cualquier persona podría hacerse pasar por cualquier usuario (si A ve el *username* de B, puede usarlo después como suyo). Además un usuario no tiene información persisente en la aplicación.
 
-**2.- ¿Cómo solucionarías este problema? **
+**2.- ¿Cómo solucionarías este problema?**
 
 Creando un registro de usuarios para asignarles a cada uno un *username* único con el cuál puedan identificarse.
 
-**3.- ¿Existe forma de saber de donde proviene el mensaje sin el encabezado? **
+**3.- ¿Existe forma de saber de donde proviene el mensaje sin el encabezado?**
 
 No, pues el servidor sólo está a la escucha y no sabe de donde recibe el mensaje.
 
