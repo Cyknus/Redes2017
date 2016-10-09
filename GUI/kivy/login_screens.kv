@@ -1,0 +1,110 @@
+<LocalLoginScreen>:
+    name: 'init'
+    GridLayout:
+        spacing: 10
+        padding: 5
+        cols: 2
+        Label:
+            text: "¿Cuál es mi puerto?"
+            size_hint: .7, .6
+            color: (0.3, 0.3, 0.3, 1.0)
+        TextInput:
+            id: my_port
+            text: '5001'
+            multiline: False
+            size_hint: .3, .6
+            padding: [8,  ( self.height - self.line_height ) / 2]
+        Label:
+            text: '¿Cuál es la IP del servidor?'
+            size_hint: .7, .3
+            color: (0.3, 0.3, 0.3, 1.0)
+        TextInput:
+            id: server_address
+            text: '192.168.1.70'
+            multiline: False
+            size_hint: .3, .6
+            padding: [8,  ( self.height - self.line_height ) / 2]
+        Label:
+            text: '¿Cuál es el puerto del servidor?'
+            size_hint: .7, .3
+            color: (0.3, 0.3, 0.3, 1.0)
+        TextInput:
+            id: server_port
+            text: '7000'
+            multiline: False
+            size_hint: .3, .6
+            padding: [8,  ( self.height - self.line_height ) / 2]
+        Button:
+            text: 'Ingresar'
+            size_hint: .7, .4
+            padding: [8,  ( self.height - self.line_height ) / 2]
+            background_color: (0.43, 0.87, 0.82, 1.0)
+            on_press: root.accessRequest(my_port.text, server_address.text, server_port.text)
+        Button:
+            text: 'Limpiar'
+            size_hint: .3, .4
+            on_press: server_port.text=''
+            on_press: server_address.text=''
+            on_press: my_port.text=''
+
+<RemoteLoginScreen>:
+    name: 'init'
+    GridLayout:
+        spacing: 10
+        padding: 5
+        cols: 2
+        Label:
+            text: '¿Cuál es la IP del servidor?'
+            size_hint: .7, .3
+            color: (0.3, 0.3, 0.3, 1.0)
+        TextInput:
+            id: server_address
+            text: '192.168.1.70'
+            multiline: False
+            size_hint: .3, .6
+            padding: [8,  ( self.height - self.line_height ) / 2]
+        Label:
+            text: '¿Cuál es el puerto del servidor?'
+            size_hint: .7, .3
+            color: (0.3, 0.3, 0.3, 1.0)
+        TextInput:
+            id: server_port
+            text: '7000'
+            multiline: False
+            size_hint: .3, .6
+            padding: [8,  ( self.height - self.line_height ) / 2]
+        Button:
+            text: 'Ingresar'
+            size_hint: .7, .4
+            padding: [8,  ( self.height - self.line_height ) / 2]
+            background_color: (0.43, 0.87, 0.82, 1.0)
+            on_press: root.accessRequest(server_address.text, server_port.text)
+        Button:
+            text: 'Limpiar'
+            size_hint: .3, .4
+            on_press: server_port.text=''
+            on_press: server_address.text=''
+
+<ConnectScreen>:
+    GridLayout:
+        spacing: 10
+        padding: 5
+        cols: 2
+        Label:
+            text: 'Usuario'
+            color: (0.3, 0.3, 0.3, 1.0)
+            size_hint: .7, .6
+        TextInput:
+            id: username
+            multiline: False
+            size_hint: .3, .6
+            padding: [8,  ( self.height - self.line_height ) / 2]
+        Button:
+            text: 'Ingresar'
+            on_press: root.connect(username.text) if username.text != '' else print("[err] Username needed")
+            size_hint: .7, .4
+            background_color: (0.43, 0.87, 0.82, 1.0)
+        Button:
+            text: 'Limpiar'
+            on_press: username.text=''
+            size_hint: .3, .4

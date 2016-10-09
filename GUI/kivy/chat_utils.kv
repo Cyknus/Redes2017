@@ -1,0 +1,39 @@
+<AudioWidget>:
+    orientation: 'horizontal'
+    Button:
+        text: 'Colgar'
+        on_press: root.hang_up()
+        background_color:  (0.87, 0.43, 0.82, 1.0)
+
+<LogoutScreen>:
+    name: 'logout'
+    Label:
+        text: 'Adiós!'
+
+<ContactsList>:
+    name: 'contacts_list'
+    size_hint: 1, 1
+
+<ChatsActiveList>:
+    name: 'chats_list'
+    size_hint: 1, 1
+
+<NewChatModal>:
+    size_hint: None, None
+    size: 400, 400
+    GridLayout:
+        orientation: 'vertical'
+        rows: 3
+        Label:
+            id: contact_username
+            text: 'Default text'
+            size_hint: 1, 0.2
+        TextInput:
+            id: new_message
+            multiline: True
+            size_hint: 1, 0.7
+        Button:
+            text: 'Enviar'
+            on_press: root.send_message(new_message.text.strip())
+            size_hint: 1, 0.1
+            background_color: (0.43, 0.87, 0.82, 1.0)

@@ -4,7 +4,7 @@
 import gi
 gi.require_version('Gtk', '3.0')
 
-from GUI.screens import ChatApp
+from GUI.Main import ChatApp
 
 def main(local):
     chat = ChatApp(local)

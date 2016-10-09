@@ -23,8 +23,8 @@ class MyApiServer:
                                 entry_audio_call
         @param my_port - Default: 5000 - Port in which server runs
     """
-    def __init__(self, gui_parent, my_port=CHAT_PORT):
-        self.port = int(my_port)
+    def __init__(self, gui_parent, my_port=None):
+        self.port = int(my_port) if my_port else CHAT_PORT
         self.ip = get_ip_address()
         self.chats_dictionary = {}
         # configurar el servidor
@@ -47,8 +47,16 @@ class MyApiServer:
 
     def remove_chat(self, username):
         self.log.debug("Drop %s of chats_dictionary", username)
-        self.log.debug("Current active chats:\n%s", str(chats_dictionary))
+        self.log.debug("Current active chats:\n%s", str(self.chats_dictionary))
         self.chats_dictionary.pop(username)
+
+    def add_chat(self, contact):
+        self.log.debug("Added %s in chats_dictionary", contact.username)
+        self.chats_dictionary[contact.username] =  {
+            IP_CONTACT: contact_ip,
+            PORT_CONTACT: contact_port,
+            'audio_call': False
+        }
 
 class FunctionWrapper:
     """
@@ -57,19 +65,20 @@ class FunctionWrapper:
     def __init__(self, gui_parent, chats_dictionary):
         self.gui_parent = gui_parent
         self.chats_dictionary = chats_dictionary # Handle entry connections
-        self.log = Logger.getFor("MyApiServer.FunctionWrapper")
+        self.log = Logger.getFor("FunctionWrapper")
 
     @build_response
     def new_chat_wrapper(self, contact_ip, contact_port, username):
         self.log.debug("New connection from %s@%s:%d", username, contact_ip, contact_port)
+
         if username not in self.chats_dictionary:
             self.gui_parent.current_screen.entry_connection(username, contact_ip, contact_port)
             self.chats_dictionary[username] = {
                 IP_CONTACT: contact_ip,
                 PORT_CONTACT: contact_port,
-                'chat': True,
-                'audio_call' False
+                'audio_call': False
             }
+
         return OK, "Connection ready"
 
     @decode_message
@@ -102,11 +111,12 @@ class FunctionWrapper:
             return ERROR, "Connection Refused"
 
         if typo == AUDIO:
-            self.log.debug("New call from $s@%s:%d", contact_username, contact_ip, contact_port)
-            if self.chats_dictionary['audio_call']:
+            self.log.debug("New call from %s@%s:%d", contact_username, contact_ip, contact_port)
+            if username in self.chats_dictionary: # TODO: how to know if the call is already open?
                 return OK, "Connection already open"
 
             self.gui_parent.current_screen.entry_audio_call(contact_username, contact_ip)
+            # self.chats_dictionary[username]['audio_call'] = True
             return OK, "Connection ready"
 
         return ERROR, "Invalid Operation"

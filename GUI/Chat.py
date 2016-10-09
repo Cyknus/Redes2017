@@ -1,138 +1,146 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-from kivy.app import App
-from kivy.lang import Builder
-from kivy.uix.label import Label
-from kivy.uix.screenmanager import ScreenManager, Screen
+from .ikivy import *
+from Channel.Channels import RequestChannel
+from Constants.Constants import *
+from Constants.AuxiliarFunctions import get_message_header
+from GUI.Utils import LogoutScreen
+from kivy.clock import mainthread
 from kivy.core.window import Window
+from kivy.lang import Builder
+from kivy.uix.screenmanager import Screen
+from Services.Logger import *
 
-from .ikivy import MyLabel
+Builder.load_file('GUI/kivy/chat_screens.kv')
 
-from Channel.ApiClient import MyApiClient
-from Channel.Channel import Channel
+class MainScreen(Screen):
+    def __init__(self, channel, username, **kwargs):
+        super(MainScreen, self).__init__(**kwargs)
+        self.channel = channel
+        self.username = username
+        self.header = get_message_header(self.username, self.channel.api_server.ip, self.channel.api_server.port)
+        self.session_active = True
+        self.log = Logger.getFor("MainScreen")
 
-from Constants import *
-
-from Channel.AudioCall import *
-
-Window.clearcolor = Constants.RGBA_BG
-
-# Descripción de las ventanas
-Builder.load_file('GUI/screens.kv')
-# Para manejar las pantallas
-sm = ScreenManager()
-# El cliente que se levanta
-client = MyApiClient()
-channel = Channel()
-# Sólo una instancia de pyAudio
-pa = AudioCall()
-pa.openOutput() # TODO modularizar esto para no tener el stream abierto todo el tiempo.. => se mueve a otra pantalla
-
-class LocalLoginScreen(Screen):
-    def accessRequest(self, my_port, contact_port):
-        """ Ingreso de modo local """
-        print("Estableciendo conexión..")
+    def log_out(self):
         try:
-            channel.connect_to(contact_port=contact_port)
-            channel.server_up(client, my_port)
-            print("Conexión establecida entre " + str(my_port) + " hacia " + str(contact_port))
-
-            # lanzar la siguiente ventana
-            sm.current = "chat"
-            Window.size = Constants.CHAT_SIZE
+            msg = self.channel.disconnect(self.username)
+            self.session_active = False
+            self.channel.api_server.stop()
         except Exception as e:
-            if channel.server is not None:
-                channel.server_down()
-            print("No se ha podido establecer una conexión. Intenta de nuevo.")
+            self.log.error("Can't close session: %s", e)
+        else:
+            self.log.info("Logged out: %s", msg)
+            logout = LogoutScreen()
+            Window.size =  (INFO_WIDTH, INFO_HEIGTH)
+            self.manager.switch_to(logout)
 
-class RemoteLoginScreen(Screen):
-    def accessRequest(self, contact_ip):
-        """ Ingreso de modo remoto """
+    def add_chat(self, req_channel, contact):
+        chat = ChatScreen(header=self.header, channel=req_channel, stop=self.remove_chat, name=contact.username)
+        # add screen
+        self.ids.sm_chats.add_widget(chat)
+        self.ids.sm_chats.current = contact.username
+        # update active chats
+        self.ids.chats_list.active.append(contact)
+        # add to server
+        self.channel.api_server.add_chat(contact)
+
+        self.log.debug("Added chat with %s", contact)
+        return chat
+
+    def remove_chat(self, username):
+        # unbind
+        screen = self.ids.sm_chats.get_screen(username)
+        screen.unbind(name=self.ids.sm_chats._screen_name_changed)
+        screen.manager = None
+        # remove
+        self.ids.sm_chats.screens.remove(screen)
+        self.ids.sm_chats.current = "default"
+        # update active chats
+        self.ids.chats_list.active.remove(username)
+        # remove from server
+        self.channel.api_server.remove_chat(username)
+
+        self.log.debug("Removed chat with %s", username)
+
+    def new_connection(self, contact):
+        print("new conn")
         try:
-            channel.connect_to(contact_ip=contact_ip)
-            channel.server_up(client)
-            print("Conexión establecida hacia " + str(contact_ip))
+            if self.ids.sm_chats.has_screen(contact.username):
+                self.log.info("Already connected with %s", contact)
+                return self.ids.sm_chats.get_screen(contact.username)
 
-	        # lanzar la siguiente ventana
-            sm.current = "chat"
-            Window.size = Constants.CHAT_SIZE
+            req_channel = RequestChannel(contact.ip_address, contact.port)
+            server = self.channel.api_server
+            res = req_channel.new_connection(server.ip, server.port, self.username)
         except Exception as e:
-            if channel.server is not None:
-                channel.server_down()
-            print("No se ha podido establecer una conexión. Intenta de nuevo")
+            self.log.error("Can't create connection: %s", e)
+        else:
+            return self.add_chat(req_channel, contact)
+
+    @mainthread
+    def entry_connection(self, contact_username, contact_ip, contact_port):
+        req_channel = RequestChannel(contact_ip, contact_port)
+        return self.add_chat(req_channel, ContactItem(contact_username, contact_ip, contact_port))
+
+    @mainthread
+    def entry_message(self, username, ip_address, port, text):
+        self.ids.sm_chats.current = username
+        chat = self.ids.sm_chats.current_screen
+        chat.draw_text_case(text, RECD)
+
+    @mainthread
+    def entry_audio_call(self, username, ip_address):
+        screen = self.ids.sm_chats.get_screen(username)
+        screen.open_audio_call()
 
 class ChatScreen(Screen):
-    def __init__(self, **kwargs):
+    def __init__(self, header, channel, stop, **kwargs):
         super(ChatScreen, self).__init__(**kwargs)
-        self.stream_record = None
+        self.channel = channel
+        self.header = header
+        self.close_function = stop
+        self.log = Logger.getFor("ChatScreen")
 
-    def send(self, text):
-        if text == '':
-            return
-
+    def send(self, message):
         try:
-            channel.send_text(text)
-            # aquí tiene que aparecer en pantalla el último enviado
-            msg = MyLabel(text=text, color=Constants.RGB_SEND)
+            self.channel.send_text(self.header + message)
+            self.draw_text_case(message, SEND)
+        except Exception as err:
+            self.log.error("Can't send message: %s", err)
+            self.draw_text_case(message, NSEND)
+        finally:
+            self.ids.block_of_typos.text=''
+
+    def close_chat(self):
+        self.close_function(self.name)
+
+    def video_call(self):
+        pass
+
+    def audio_call(self):
+        try:
+            # self.channel.begin_call(self.header + AUDIO)
         except Exception as e:
-            msg = MyLabel(text=text, color=Constants.RGB_NSEND)
-            print("Mensaje no ha podido ser enviado.")
-
-        client.display.add_widget(msg)
-        # limpiar lo que está escrito
-        self.ids.block_of_typos.text = ''
-
-    def call(self):
-        if self.stream_record is None:
-            print("Llamando..")
-            self.ids.call_button.text = 'Colgar'
-            # abre el stream para grabar e inicia el thread que lo maneja
-            self.stream_record = pa.record(callback)
+            self.log.error("Can't start call: %s", e)
         else:
-            print("Colgando..")
-            self.ids.call_button.text = "Llamar"
-            # detener el servicio de llamada
-            self.stream_record.stop()
-            # Actualizar bandera
-            self.stream_record = None
+            self.open_audio_call()
 
-# mientras vemos a donde moverla..
-def callback(in_data, f, t, s):
-    channel.send_bytes(in_data) # TODO mandarlo a otro hilo, se está rezagando el cómo llegan los datos
+    def draw_text(self, text, color, halign):
+        width = self.ids.messages.container.width - 10
+        label = MyLabel(text=text, color=color, halign=halign, size=(width, None))
+        self.ids.messages.adapter.data.append(label)
 
-    return (None, AudioCall.CONTINUE) # continuar grabando
+    def draw_text_case(self, text, type):
+        if type == SEND:
+            self.draw_text(text, RGB_SEND, 'right')
+        elif type == RECD:
+            self.draw_text(text, RGB_RECD, 'left')
+        else:
+            self.draw_text(text, RGB_NSEND, 'right')
 
-# dummy class
-class ChatApp(App):
-    def build(self):
-        return sm
-
-    def on_stop(self):
-        pa.closeOutput()
-        if channel.server is not None:
-            channel.server_down()
-
-# acoplar todo
-def build_screen_manager(local):
-    if local:
-        sm.add_widget(LocalLoginScreen(name="login"))
-        size = Constants.SIZE_LL
-    else:
-        sm.add_widget(RemoteLoginScreen(name="login"))
-        size = Constants.SIZE_RL
-
-    Window.size = size # tamaño de acuerdo al login
-    # set scroll view
-    root = ChatScreen(name="chat")
-    sm.add_widget(root)
-
-    # Make sure the height is such that there is something to scroll.
-    root.ids.layout.bind(minimum_height=root.ids.layout.setter('height'))
-    client.display = root
-    client.stream = pa.stream
-
-    # creamos la aplicación
-    chat = ChatApp()
-
-    return chat
+    def open_audio_call(self):
+        self.log.debug("Creating panel for audio_call")
+        #x = AudioWidget(self.channel)
+        #self.ids.actions_buttons.add_widget(x)

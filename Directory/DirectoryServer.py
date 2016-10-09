@@ -1,50 +1,27 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-
-#####################################################
-# PURPOSE: Clase que manejara los clientes que se   #
-#          conectan y desconectan al sistema        #
-#                                                   #
-# Vilchis Dominguez Miguel Alonso                   #
-#       <mvilchis@ciencias.unam.mx>                 #
-#                                                   #
-# Notes:                                            #
-#                                                   #
-# Copyright   17-08-2015                            #
-#                                                   #
-# Distributed under terms of the MIT license.       #
-#####################################################
 from xmlrpc.server import SimpleXMLRPCServer, SimpleXMLRPCRequestHandler
 import sys
 sys.path.append("../")
 from Constants.AuxiliarFunctions import *
 from Constants.Constants import *
 
-LOCALHOST = get_ip_address()
-
 # Restrict to a particular path.
 class RequestHandler(SimpleXMLRPCRequestHandler):
     rpc_paths = ('/RPC2',)
 
 class GeneralDirectory:
-    """ Constructor de la clase, si recibe un puerto, entonces
-        Trabajara de manera local, de otra manera, utilizará  la ip
-        con la que cuenta.
-        @param port <int> Si trabaja de manera local, representa el
-                        número del puerto por el cual recibirá las peticiones
-    """
     def __init__(self, port=SERVER_PORT):
         self.client_dictionary = {}
         wrapper = FunctionWrapperDirectory(self.client_dictionary)
 
-        self.server = SimpleXMLRPCServer((LOCALHOST, int(port)), requestHandler=RequestHandler)
+        self.server = SimpleXMLRPCServer((get_ip_address(), int(port)), requestHandler=RequestHandler)
         self.server.register_introspection_functions()
-        self.server.register_multicall_functions()
         self.server.register_instance(wrapper)
 
         print("Directorio de ubicacion activo, mi direccion es:")
-        print("(%s, %s)"%(LOCALHOST, port))
+        print("(%s, %s)"%(get_ip_address(), port))
 
     def run(self):
         try:
@@ -54,11 +31,6 @@ class GeneralDirectory:
             self.server.server_close()
 
 class FunctionWrapperDirectory:
-    """ **************************************************
-    Constructor de la clase
-    @clients_dictionary (Diccionario) Contiene la información de
-                todos los clientes (Usa username como llave, y contiene el nombre del usuario)
-    ************************************************** """
     def __init__(self, client_dictionary):
         self.client_dictionary = client_dictionary
 

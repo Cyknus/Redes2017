@@ -33,10 +33,10 @@ def dummy_run(arg, **kwargs):
         time.sleep(0.1)
 
 """ Funcion que construira el header del mensaje a mandar """
-def get_message_header(username, ip):
-    return username+':'+ip+':'
+def get_message_header(username, ip, port):
+    return username+':'+ip+':'+str(port)+':'
 
 def split_message_header(message):
     message_split = message.split(':')
     message_text = ':'.join(message_split[MESSAGE_TEXT:])
-    return (message_split[MESSAGE_USERNAME], message_split[MESSAGE_IP], message_text)
+    return (message_split[MESSAGE_USERNAME], message_split[MESSAGE_IP], int(message_split[MESSAGE_PORT]), message_text)

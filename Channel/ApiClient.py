@@ -2,11 +2,10 @@
 # -*- coding: utf-8 -*-
 
 from xmlrpc.client import ServerProxy
-from Constants.Constants import *
-from Constants.AuxiliarFunctions import get_ip_address
+from Services.Decorators import parse_params
 
-LOCALHOST = get_ip_address()
 
 class MyApiClient:
-    def __init__(self, contact_ip=LOCALHOST, contact_port=CHAT_PORT):
+    @parse_params
+    def __init__(self, contact_ip=None, contact_port=None):
         self.proxy = ServerProxy('http://%s:%i'%(contact_ip, int(contact_port)), allow_none=True)

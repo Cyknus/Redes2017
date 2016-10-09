@@ -11,7 +11,7 @@ class Logger(object):
     @staticmethod
     def getFor(name):
         handler = logging.StreamHandler()
-        formatter = logging.Formatter('[%(levelname)s] %(name)-12s %(asctime)s :: %(message)s')
+        formatter = logging.Formatter('%(threadName)s -- [%(levelname)s] %(name)-12s %(asctime)s :: %(message)s')
         handler.setFormatter(formatter)
         logger = logging.getLogger(name)
         logger.addHandler(handler)

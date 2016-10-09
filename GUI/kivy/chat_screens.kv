@@ -1,0 +1,120 @@
+#:import adapter GUI.ikivy
+#:import ContactsList GUI.Utils
+#:import ChatsActiveList GUI.Utils
+
+<MainScreen>:
+    name: 'main'
+    BoxLayout:
+        orientation: 'horizontal'
+        rows: 2
+        background_color: (.471, .09, .286, 1)
+        TabbedPanel:
+            id: menu
+            size_hint: .3, 1
+            do_default_tab: False
+            TabbedPanelItem:
+                text: ''
+                background_down: 'GUI/images/chats.png'
+                background_normal: 'GUI/images/chats_normal.png'
+                BoxLayout:
+                    orientation: 'vertical'
+                    Button:
+                        text: 'Salir'
+                        size_hint: 1, None
+                        height: 40
+                        on_press: root.log_out()
+                    ChatsActiveList:
+                        id: chats_list
+                        sm: root.ids.sm_chats
+                        top_parent: root
+            TabbedPanelItem:
+                text: ''
+                background_down: 'GUI/images/contacts.png'
+                background_normal: 'GUI/images/contacts_normal.png'
+                BoxLayout:
+                    orientation: 'vertical'
+                    Button:
+                        text: ''
+                        size_hint: 1, None
+                        height: 40
+                        background_color: (0.43, 0.87, 0.82, 1.0)
+                        on_press: contacts_list.update_contacts()
+                        Image:
+                            source: 'GUI/images/refresh.png'
+                            size: 32, 32
+                            y: self.parent.y + self.parent.height - 36
+                            x: self.parent.x + self.parent.width / 2 - 16
+                    ContactsList:
+                        id: contacts_list
+                        top_parent: root
+        ScreenManager:
+            id: sm_chats
+            size_hint: .7, 1
+            Screen:
+                name: 'default'
+                Label:
+                    color: (0, 0, 0, 1)
+                    text: 'Selecciona una conversación'
+
+<ChatScreen>:
+    FloatLayout:
+        BoxLayout:
+            id: actions_buttons
+            orientation: 'horizontal'
+            size_hint: 1, .1
+            pos_hint: {'x': 0, 'y': .9}
+            Button:
+                text: ''
+                size_hint: 0.2, None
+                height: 40
+                background_color: (0.43, 0.87, 0.82, 0)
+                on_press: root.audio_call()
+                Image:
+                    source: 'GUI/images/audio.png'
+                    size: 32, 32
+                    y: self.parent.y + self.parent.height - 36
+                    x: self.parent.x + self.parent.width / 2 - 16
+            Button:
+                text: ''
+                size_hint: 0.2, None
+                height: 40
+                background_color: (0.43, 0.87, 0.82, 0)
+                on_press: root.video_call()
+                Image:
+                    source: 'GUI/images/video.png'
+                    size: 32, 32
+                    y: self.parent.y + self.parent.height - 36
+                    x: self.parent.x + self.parent.width / 2 - 16
+            Button:
+                text: ''
+                size_hint: 0.2, None
+                height: 40
+                background_color: (0.43, 0.87, 0.82, 0)
+                on_press: root.close_chat()
+                Image:
+                    source: 'GUI/images/close.png'
+                    size: 32, 32
+                    y: self.parent.y + self.parent.height - 36
+                    x: self.parent.x + self.parent.width / 2 - 16
+        ListView:
+            id: messages
+            size_hint: .98, .75
+            pos_hint: {'x':.005, 'y': 0.12}
+            spacing: 7
+            adapter: adapter.MyListAdapter()
+        TextInput:
+            id: block_of_typos
+            multiline: True
+            size_hint: .84, .11
+            pos_hint: {'x':.005, 'y':.005}
+        Button:
+            on_press: root.send(block_of_typos.text.strip()) if block_of_typos.text.strip() != '' else print("No message to send")
+            size_hint: .14, .11
+            pos_hint: {'x': .85, 'y': .005}
+            background_color: (0, 0, 0, 0)
+            Image:
+                source: 'GUI/images/send.png'
+                size: 50, 50
+                y: self.parent.y + self.parent.height - 50
+                x: self.parent.x
+                allow_stretch: True

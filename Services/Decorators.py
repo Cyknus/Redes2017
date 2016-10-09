@@ -1,6 +1,10 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+from xmlrpc.client import ProtocolError
+from Constants.Constants import *
+from Constants.AuxiliarFunctions import *
+
 # Format responses
 def build_response(func):
     def format_response(*args):
@@ -21,9 +25,9 @@ def decode_message(func):
 
 # interpreter for args when creating connections
 def parse_params(func):
-    def get_ip_address(self, contact_ip=None, contact_port=None):
-        ip = contact_ip if contact_ip else get_ip_address()
-        port = int(contact_port) if contact_port else CHAT_PORT
+    def get_ip_address(self, ip_address=None, port=None):
+        ip = ip_address if ip_address else get_ip_address()
+        port = int(port) if port else CHAT_PORT
         return func(self, ip, port)
     return get_ip_address
 
@@ -31,10 +35,10 @@ def parse_params(func):
 def try_catch(func):
     def wrap_request(self, *args):
         try:
-            func(*args)
+            func(self, *args)
         except ProtocolError as e:
             self.log.error("Can't resolve request: %s", func.__name__)
             raise ConnectionAbortedError()
         else:
-            self.log.info("Request completed")
+            self.log.debug("Request completed")
     return wrap_request

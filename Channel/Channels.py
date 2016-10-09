@@ -7,7 +7,6 @@ from Constants.Constants import *
 from Services.Decorators import try_catch, parse_params
 from Services.Logger import *
 from threading import Thread
-from xmlrpc.client import ProtocolError
 
 class RequestChannel():
     """
@@ -24,7 +23,6 @@ class RequestChannel():
         self.contact_ip = contact_ip
         self.contact_port = contact_port
         self.log = Logger.getFor("RequestChannel")
-        self.log.debug("Initialization complete")
 
     @try_catch
     def send_text(self, text):
@@ -63,7 +61,7 @@ class RequestChannel():
             self.log.error("Unexpected response: %s", res[MESSAGE])
             raise ValueError()
         elif res[STATUS] == OK:
-            self.log.debug("")
+            self.log.debug("Got response: %s", res[MESSAGE])
 
     def send_bytes(self, data):
         try:

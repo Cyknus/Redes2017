@@ -34,7 +34,7 @@ class ContactItem(SelectableDataItem):
         self.is_selected = is_selected
 
     def __str__(self):
-        return self.username + " at " + self.ip_address + "@" + str(self.port)
+        return self.username + "@" + self.ip_address + ":" + str(self.port)
 
     def __eq__(self, other):
         if type(other) is ContactItem:
