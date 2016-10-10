@@ -49,6 +49,16 @@ class MainScreen(Screen):
         self.log.debug("Added chat with %s", contact)
         return chat
 
+    @mainthread
+    def remove_contact(self, contact):
+        self.log.info("Removing %s from list", contact)
+        self.ids.contacts_list.remove_contact(contact)
+
+    @mainthread
+    def add_contact(self, username, ip, port):
+        self.log.info("Adding %s to list", username)
+        self.ids.contacts_list.add_contact(username, ip, port)
+
     def remove_chat(self, username):
         # unbind
         screen = self.ids.sm_chats.get_screen(username)
@@ -122,6 +132,7 @@ class ChatScreen(Screen):
     def audio_call(self):
         try:
             # self.channel.begin_call(self.header + AUDIO)
+            pass
         except Exception as e:
             self.log.error("Can't start call: %s", e)
         else:

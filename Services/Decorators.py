@@ -35,10 +35,11 @@ def parse_params(func):
 def try_catch(func):
     def wrap_request(self, *args):
         try:
-            func(self, *args)
+            res = func(self, *args)
         except ProtocolError as e:
             self.log.error("Can't resolve request: %s", func.__name__)
             raise ConnectionAbortedError()
         else:
             self.log.debug("Request completed")
+            return res
     return wrap_request

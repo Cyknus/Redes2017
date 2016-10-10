@@ -36,6 +36,7 @@ NAME_CONTACT = 'username'
 IP_CONTACT = 'ip_contact'
 PORT_CONTACT = 'port_contact'
 MSG_CONTACT = 'message'
+CHANNEL_CONTACT = 'req_channel'
 # code status
 STATUS = "status"
 MESSAGE = "message"

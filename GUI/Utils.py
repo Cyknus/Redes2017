@@ -80,6 +80,12 @@ class ContactsList(Screen):
             self.data.append(ContactItem(v[NAME_CONTACT], v[IP_CONTACT], v[PORT_CONTACT]))
         self.log.info("%d contacts loaded", len(contacts))
 
+    def remove_contact(self, username):
+        self.data.remove(username)
+
+    def add_contact(self, username, ip, port):
+        self.data.append(ContactItem(username, ip, port))
+
     def update_contacts(self):
         try:
             dict_contacts = self.top_parent.channel.get_contacts(self.top_parent.username)

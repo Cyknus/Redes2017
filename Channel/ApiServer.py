@@ -37,8 +37,12 @@ class MyApiServer:
         self.log.debug("Local server initialized")
 
     def run(self):
-        self.log.info("Local server running at %s:%d", self.ip, self.port)
-        self.server.serve_forever()
+        try:
+            self.log.info("Local server running at %s:%d", self.ip, self.port)
+            self.server.serve_forever()
+        except KeyboardInterrupt:
+            self.server.shutdown()
+            self.server.server_close()
 
     def stop(self):
         self.log.info("Shutting down server")
@@ -46,15 +50,15 @@ class MyApiServer:
         self.server.server_close()
 
     def remove_chat(self, username):
+        self.chats_dictionary.pop(username)
         self.log.debug("Drop %s of chats_dictionary", username)
         self.log.debug("Current active chats:\n%s", str(self.chats_dictionary))
-        self.chats_dictionary.pop(username)
 
     def add_chat(self, contact):
         self.log.debug("Added %s in chats_dictionary", contact.username)
         self.chats_dictionary[contact.username] =  {
-            IP_CONTACT: contact_ip,
-            PORT_CONTACT: contact_port,
+            IP_CONTACT: contact.ip_address,
+            PORT_CONTACT: contact.port,
             'audio_call': False
         }
 
@@ -120,3 +124,28 @@ class FunctionWrapper:
             return OK, "Connection ready"
 
         return ERROR, "Invalid Operation"
+
+    @build_response
+    def remove_contact(self, username):
+        if username in self.chats_dictionary:
+            self.chats_dictionary.pop(username)
+            self.log.debug("Current online contacts: %s", self.chats_dictionary.keys())
+            self.gui_parent.current_screen.remove_contact(username)
+
+        return OK, "Contact %s droped".format(username)
+
+    @build_response
+    def add_contact(self, username, ip, port):
+        if username not in self.chats_dictionary:
+            self.chats_dictionary[username] =  {
+                IP_CONTACT: ip,
+                PORT_CONTACT: port,
+                'audio_call': False
+            }
+            self.log.debug("Current online contacts: %s", self.chats_dictionary.keys())
+            self.gui_parent.current_screen.add_contact(username, ip, port)
+
+        return OK, "Contact %s added".format(username, ip, port)
+
+    def ping_wrapper(self):
+        return True

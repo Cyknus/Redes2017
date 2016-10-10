@@ -31,12 +31,12 @@ class RequestChannel():
         res = self.api_client.proxy.send_message_wrapper(text)
         if res[STATUS] == ERROR:
             self.log.error("Request failed: %s", res[MESSAGE])
-            raise ConnectionRefusedError()
+            raise ConnectionRefusedError(res[MESSAGE])
         elif res[STATUS] == OK:
             self.log.info("Got response: %s", res[MESSAGE])
             return
 
-        raise NotImplementedError()
+        raise NotImplementedError("Invalid option")
 
     @try_catch
     def new_connection(self, my_ip, my_port, username):
@@ -45,12 +45,12 @@ class RequestChannel():
         res = self.api_client.proxy.new_chat_wrapper(my_ip, my_port, username)
         if res[STATUS] == ERROR:
             self.log.error("Unexpected response: %s", res[MESSAGE])
-            raise ValueError()
+            raise ValueError(res[MESSAGE])
         elif res[STATUS] == OK:
             self.log.info("Got response: %s", res[MESSAGE])
             return
 
-        raise NotImplementedError()
+        raise NotImplementedError("Invalid option")
 
     @try_catch
     def begin_call(self, call):
@@ -59,7 +59,7 @@ class RequestChannel():
         res = self.api_client.proxy.new_call_wrapper(call)
         if res[STATUS] == ERROR:
             self.log.error("Unexpected response: %s", res[MESSAGE])
-            raise ValueError()
+            raise ValueError(res[MESSAGE])
         elif res[STATUS] == OK:
             self.log.debug("Got response: %s", res[MESSAGE])
 
@@ -91,8 +91,5 @@ class BidirectionalChannel(RequestChannel):
         self.api_server_thread = Thread(target=self.api_server.run)
         self.api_server_thread.start()
 
-    """**************************************************
-    Metodos Get
-    **************************************************"""
     def get_api_server(self):
         return self.api_server_thread

@@ -1,11 +1,18 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+import time
+from threading import Thread, Lock
 from xmlrpc.server import SimpleXMLRPCServer, SimpleXMLRPCRequestHandler
 import sys
 sys.path.append("../")
+from Channel.Channels import RequestChannel
 from Constants.AuxiliarFunctions import *
 from Constants.Constants import *
+from Services.Decorators import build_response
+from Services.Logger import *
+
+lock = Lock()
 
 # Restrict to a particular path.
 class RequestHandler(SimpleXMLRPCRequestHandler):
@@ -19,9 +26,13 @@ class GeneralDirectory:
         self.server = SimpleXMLRPCServer((get_ip_address(), int(port)), requestHandler=RequestHandler)
         self.server.register_introspection_functions()
         self.server.register_instance(wrapper)
+        self.log = Logger.getFor("GeneralDirectory")
 
-        print("Directorio de ubicacion activo, mi direccion es:")
-        print("(%s, %s)"%(get_ip_address(), port))
+        self.log.info("Directorio de ubicacion activo, mi direccion es:")
+        self.log.info("(%s, %s)"%(get_ip_address(), port))
+
+        self.thread_contacts = Thread(target=self.ping_contacts, name="ContactsThread")
+        self.thread_contacts.start()
 
     def run(self):
         try:
@@ -29,35 +40,81 @@ class GeneralDirectory:
         except KeyboardInterrupt:
             self.server.shutdown()
             self.server.server_close()
+            self.server = None
+        self.thread_contacts.join()
+
+    def ping_contacts(self):
+        while self.server:
+            with lock:
+                contacts = self.client_dictionary.items()
+                self.log.debug(self.client_dictionary.keys())
+
+            for k, v in contacts:
+                proxy = v[CHANNEL_CONTACT].api_client.proxy
+                try:
+                    proxy.ping_wrapper()
+                except:
+                    with lock:
+                        self.client_dictionary.pop(k)
+                        _contacts = self.client_dictionary.items()
+
+                    for _k, _v in _contacts:
+                        _proxy = _v[CHANNEL_CONTACT].api_client.proxy
+                        _proxy.remove_contact(k)
+            time.sleep(5)
 
 class FunctionWrapperDirectory:
     def __init__(self, client_dictionary):
         self.client_dictionary = client_dictionary
+        self.log = Logger.getFor("FunctionWrapper")
 
+    @build_response
     def get_contacts_wrapper(self,  username):
-        print("[info] Retrieving contacts list to " + username)
-        return {"status": OK, "detailedInfo": {k:v for k, v in self.client_dictionary.items() if k != username}}
+        self.log.info("Retrieving contacts to %s", username)
+        return OK, { k: { k:v for k, v in self.client_dictionary[k].items() if k != CHANNEL_CONTACT }
+            for k, v in self.client_dictionary.items() if k != username }
 
+    @build_response
     def connect_wrapper(self, ip_string, port_string, username):
         if username in self.client_dictionary:
-            return {"status": ERROR, "detailedInfo": "Username already exist"}
+            return ERROR, "Username already exist"
         else:
-            print("[info] Added " + username + " to directory")
+            with lock:
+                _contacts = self.client_dictionary.items()
 
-            self.client_dictionary[username] = {
-                NAME_CONTACT: username,
-                IP_CONTACT: ip_string,
-                PORT_CONTACT: port_string
-            }
-            return {"status": OK, "detailedInfo": self.get_contacts_wrapper(username)["detailedInfo"]}
+            for _k, _v in _contacts:
+                _proxy = _v[CHANNEL_CONTACT].api_client.proxy
+                _proxy.add_contact(username, ip_string, port_string)
 
+            req_channel = RequestChannel(ip_string, port_string)
+
+            with lock:
+                self.client_dictionary[username] = {
+                        NAME_CONTACT: username,
+                        IP_CONTACT: ip_string,
+                        PORT_CONTACT: port_string,
+                        CHANNEL_CONTACT: req_channel
+                        }
+
+            self.log.info("Added %s to directory", username)
+            res = self.get_contacts_wrapper(username)
+            return res[STATUS], res[MESSAGE]
+
+    @build_response
     def disconnect_wrapper(self, username):
-        self.client_dictionary.pop(username)
-        return {"status": OK, "detailedInfo": "Connection closed"}
+        with lock:
+            self.client_dictionary.pop(username)
+            _contacts = self.client_dictionary.items()
 
+        for _k, _v in _contacts:
+            _proxy = _v[CHANNEL_CONTACT].api_client.proxy
+            _proxy.remove_contact(username)
+        return OK, "Connection closed"
+
+    @build_response
     def username_available_wrapper(self, username):
-        print("[info] Looking availability for " + username)
-        return {"status": OK, "detailedInfo": not (username in self.client_dictionary)}
+        self.log.debug("Looking availability for %s", username)
+        return OK, not (username in self.client_dictionary)
 
 # **************************************************
 #  Definicion de la funcion principal
