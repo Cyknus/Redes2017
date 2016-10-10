@@ -86,6 +86,7 @@
             on_press: server_address.text=''
 
 <ConnectScreen>:
+    name: "connect"
     GridLayout:
         spacing: 10
         padding: 5
@@ -99,12 +100,64 @@
             multiline: False
             size_hint: .3, .6
             padding: [8,  ( self.height - self.line_height ) / 2]
+        Label:
+            text: 'Password'
+            color: (0.3, 0.3, 0.3, 1.0)
+            size_hint: .7, .6
+        TextInput:
+            id: npassword
+            multiline: False
+            password: True
+            size_hint: .3, .6
+            padding: [8,  ( self.height - self.line_height ) / 2]
         Button:
             text: 'Ingresar'
-            on_press: root.connect(username.text) if username.text != '' else print("[err] Username needed")
+            on_press: root.connect(username.text, npassword.text)
             size_hint: .7, .4
             background_color: (0.43, 0.87, 0.82, 1.0)
         Button:
             text: 'Limpiar'
             on_press: username.text=''
+            on_press: npassword.text=''
             size_hint: .3, .4
+        Label:
+            text: '¿No estás registrado?'
+            color: (0.3, 0.3, 0.3, 1.0)
+            size_hint: .7, .3
+        Button:
+            text: 'Registrarme'
+            size_hint: .3, .4
+            on_press: root.manager.current = "sign_up"
+
+<UserAddScreen>:
+    name: 'sign_up'
+    GridLayout:
+        cols:
+            2
+        Label:
+            text: 'Usuario'
+            color: (0.3, 0.3, 0.3, 1.0)
+        TextInput:
+            id: nusername
+            multiline: False
+        Label:
+            text: 'Password'
+            color: (0.3, 0.3, 0.3, 1.0)
+        TextInput:
+            id: npassword
+            multiline: False
+            password: True
+        Label:
+            text: 'Confirmar password'
+            color: (0.3, 0.3, 0.3, 1.0)
+        TextInput:
+            id: ncpassword
+            multiline: False
+            password: True
+        Button:
+            text: 'Agregar usuario'
+            background_color: (0.43, 0.87, 0.82, 1.0)
+            on_press: root.user_add(nusername.text, npassword.text, ncpassword.text)
+        Button:
+            text: 'Regresar'
+            on_press: root.manager.current = "connect"

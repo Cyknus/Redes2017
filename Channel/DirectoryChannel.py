@@ -27,8 +27,11 @@ class DirectoryChannel(BidirectionalChannel):
         return res[MESSAGE]
 
     @try_catch
-    def connect(self, username):
-        res = self.api_client.proxy.username_available_wrapper(username)
+    def connect(self, username, password):
+        res = self.api_client.proxy.do_log_in_wrapper(username, password)
+        if res[STATUS] == ERROR:
+            raise ValueError(res[MESSAGE])
+
         if res[MESSAGE]:
             res_directory = self.api_client.proxy.connect_wrapper(
                 self.api_server.ip,
@@ -39,7 +42,25 @@ class DirectoryChannel(BidirectionalChannel):
                 return res_directory[MESSAGE]
             raise ConnectionAbortedError(res_directory[MESSAGE])
         else:
-            raise ValueError("Username not available")
+            raise NotImplementedError("Unexpected response")
+
+    @try_catch
+    def register(self, username, password):
+        res = self.api_client.proxy.do_sign_up_wrapper(username, password)
+        if res[STATUS] == ERROR:
+            raise ValueError(res[MESSAGE])
+
+        if res[MESSAGE]:
+            res_directory = self.api_client.proxy.connect_wrapper(
+                self.api_server.ip,
+                self.api_server.port,
+                username
+            )
+            if res_directory[STATUS] == OK:
+                return res_directory[MESSAGE]
+            raise ConnectionAbortedError(res_directory[MESSAGE])
+        else:
+            raise NotImplementedError("Unexpected response")
 
     @try_catch
     def disconnect(self, username):

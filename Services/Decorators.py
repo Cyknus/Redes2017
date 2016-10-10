@@ -43,3 +43,11 @@ def try_catch(func):
             self.log.debug("Request completed")
             return res
     return wrap_request
+
+def encrypt_password(func):
+    def crypt(self, user, passw):
+        cipher = ''
+        for c in passw:
+            cipher += chr(ord(c)+5)
+        return func(self, user, cipher)
+    return crypt

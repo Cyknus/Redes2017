@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from Constants.Constants import *
-from GUI.Login import LocalLoginScreen, RemoteLoginScreen, ConnectScreen
+from GUI.Login import LocalLoginScreen, RemoteLoginScreen, ConnectScreen, UserAddScreen
 from GUI.Chat import MainScreen
 from kivy.app import App
 from kivy.core.window import Window
@@ -33,6 +33,6 @@ class ChatApp(App):
         if c_class is MainScreen and screen.session_active:
             print("[info] Logging out..")
             screen.log_out()
-        elif c_class is ConnectScreen:
+        elif c_class is ConnectScreen or c_class is UserAddScreen:
             print("[info] Shutting down server..")
             screen.channel.api_server.stop()

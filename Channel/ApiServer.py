@@ -132,7 +132,7 @@ class FunctionWrapper:
             self.log.debug("Current online contacts: %s", self.chats_dictionary.keys())
             self.gui_parent.current_screen.remove_contact(username)
 
-        return OK, "Contact %s droped".format(username)
+        return OK, "Contact {0} droped".format(username)
 
     @build_response
     def add_contact(self, username, ip, port):
@@ -145,7 +145,7 @@ class FunctionWrapper:
             self.log.debug("Current online contacts: %s", self.chats_dictionary.keys())
             self.gui_parent.current_screen.add_contact(username, ip, port)
 
-        return OK, "Contact %s added".format(username, ip, port)
+        return OK, "Contact {0} added".format(username)
 
     def ping_wrapper(self):
         return True
