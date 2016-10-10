@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import time
+import json
 from threading import Thread, Lock
 from xmlrpc.server import SimpleXMLRPCServer, SimpleXMLRPCRequestHandler
 import sys
@@ -9,7 +10,7 @@ sys.path.append("../")
 from Channel.Channels import RequestChannel
 from Constants.AuxiliarFunctions import *
 from Constants.Constants import *
-from Services.Decorators import build_response
+from Services.Decorators import build_response, encrypt_password
 from Services.Logger import *
 
 lock = Lock()
@@ -21,13 +22,15 @@ class RequestHandler(SimpleXMLRPCRequestHandler):
 class GeneralDirectory:
     def __init__(self, port=SERVER_PORT):
         self.client_dictionary = {}
-        wrapper = FunctionWrapperDirectory(self.client_dictionary)
+        self.database = json.load(open('database.db'))
+
+        wrapper = FunctionWrapperDirectory(self.client_dictionary, self.database)
 
         self.server = SimpleXMLRPCServer((get_ip_address(), int(port)), requestHandler=RequestHandler)
         self.server.register_introspection_functions()
         self.server.register_instance(wrapper)
-        self.log = Logger.getFor("GeneralDirectory")
 
+        self.log = Logger.getFor("GeneralDirectory")
         self.log.info("Directorio de ubicacion activo, mi direccion es:")
         self.log.info("(%s, %s)"%(get_ip_address(), port))
 
@@ -41,7 +44,9 @@ class GeneralDirectory:
             self.server.shutdown()
             self.server.server_close()
             self.server = None
-        self.thread_contacts.join()
+        finally:
+            json.dump(self.database, open('database.db', 'w'))
+            self.thread_contacts.join()
 
     def ping_contacts(self):
         while self.server:
@@ -64,8 +69,9 @@ class GeneralDirectory:
             time.sleep(5)
 
 class FunctionWrapperDirectory:
-    def __init__(self, client_dictionary):
+    def __init__(self, client_dictionary, database):
         self.client_dictionary = client_dictionary
+        self.database = database
         self.log = Logger.getFor("FunctionWrapper")
 
     @build_response
@@ -76,8 +82,10 @@ class FunctionWrapperDirectory:
 
     @build_response
     def connect_wrapper(self, ip_string, port_string, username):
-        if username in self.client_dictionary:
-            return ERROR, "Username already exist"
+        if username not in self.database:
+            return ERROR, "Not found user"
+        elif username in self.client_dictionary:
+            return OK, "Username already connected"
         else:
             with lock:
                 _contacts = self.client_dictionary.items()
@@ -114,7 +122,27 @@ class FunctionWrapperDirectory:
     @build_response
     def username_available_wrapper(self, username):
         self.log.debug("Looking availability for %s", username)
-        return OK, not (username in self.client_dictionary)
+        return OK, not (username in self.database)
+
+    @encrypt_password
+    @build_response
+    def do_log_in_wrapper(self, username, password):
+        if username not in self.database:
+            return ERROR, "User doesn't exist"
+
+        if self.database[username] == password:
+            return OK, True
+        else:
+            return ERROR, "Incorrect combination"
+
+    @encrypt_password
+    @build_response
+    def do_sign_up_wrapper(self, username, password):
+        if username in self.database:
+            return ERROR, "username already registered"
+
+        self.database[username] = password
+        return OK, True
 
 # **************************************************
 #  Definicion de la funcion principal
