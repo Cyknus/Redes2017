@@ -5,7 +5,7 @@ from .ikivy import *
 from Channel.Channels import RequestChannel
 from Constants.Constants import *
 from Constants.AuxiliarFunctions import get_message_header
-from GUI.Utils import LogoutScreen
+from GUI.Utils import LogoutScreen, AudioWidget
 from kivy.clock import mainthread
 from kivy.core.window import Window
 from kivy.lang import Builder
@@ -91,9 +91,14 @@ class MainScreen(Screen):
         chat.draw_text_case(text, RECD)
 
     @mainthread
-    def entry_audio_call(self, username, ip_address):
+    def entry_audio_call(self, username, ip_address, port):
         screen = self.ids.sm_chats.get_screen(username)
         screen.open_audio_call()
+
+    @mainthread
+    def end_audio_call(self, username, ip_address, port):
+        screen = self.ids.sm_chats.get_screen(username)
+        screen.close_audio_call()
 
 class ChatScreen(Screen):
     def __init__(self, header, channel, stop, **kwargs):
@@ -102,6 +107,8 @@ class ChatScreen(Screen):
         self.header = header
         self.close_function = stop
         self.log = Logger.getFor("ChatScreen")
+
+        self.widget_call = None
 
     def send(self, message):
         try:
@@ -120,8 +127,12 @@ class ChatScreen(Screen):
         pass
 
     def audio_call(self):
+        if self.widget_call is not None:
+            self.log.info("Call already set up")
+            return
+
         try:
-            # self.channel.begin_call(self.header + AUDIO)
+            self.channel.begin_call(self.header + AUDIO)
         except Exception as e:
             self.log.error("Can't start call: %s", e)
         else:
@@ -142,5 +153,10 @@ class ChatScreen(Screen):
 
     def open_audio_call(self):
         self.log.debug("Creating panel for audio_call")
-        #x = AudioWidget(self.channel)
-        #self.ids.actions_buttons.add_widget(x)
+        self.widget_call = AudioWidget(self.channel, self.header)
+        self.ids.actions_buttons.add_widget(self.widget_call)
+
+    def close_audio_call(self):
+        self.log.debug("Removing panel for audio_call")
+        self.ids.actions_buttons.remove_widget(self.widget_call)
+        self.widget_call = None

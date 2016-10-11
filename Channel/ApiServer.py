@@ -53,8 +53,8 @@ class MyApiServer:
     def add_chat(self, contact):
         self.log.debug("Added %s in chats_dictionary", contact.username)
         self.chats_dictionary[contact.username] =  {
-            IP_CONTACT: contact_ip,
-            PORT_CONTACT: contact_port,
+            IP_CONTACT: contact.ip_address,
+            PORT_CONTACT: contact.port,
             'audio_call': False
         }
 
@@ -112,11 +112,27 @@ class FunctionWrapper:
 
         if typo == AUDIO:
             self.log.debug("New call from %s@%s:%d", contact_username, contact_ip, contact_port)
-            if username in self.chats_dictionary: # TODO: how to know if the call is already open?
+            if self.chats_dictionary[contact_username]['audio_call']:
                 return OK, "Connection already open"
 
-            self.gui_parent.current_screen.entry_audio_call(contact_username, contact_ip)
-            # self.chats_dictionary[username]['audio_call'] = True
+            self.gui_parent.current_screen.entry_audio_call(contact_username, contact_ip, contact_port)
+            self.chats_dictionary[contact_username]['audio_call'] = True
             return OK, "Connection ready"
+
+        return ERROR, "Invalid Operation"
+
+    @decode_message
+    @build_response
+    def end_call_wrapper(self, contact_username, contact_ip, contact_port, typo):
+        if contact_username not in self.chats_dictionary:
+            return ERROR, "Connection Refused"
+
+        if typo == AUDIO:
+            self.log.debug("End call from %s@%s:%d", contact_username, contact_ip, contact_port)
+            if self.chats_dictionary[contact_username]['audio_call']:
+                self.gui_parent.current_screen.end_audio_call(contact_username, contact_ip, contact_port)
+                self.chats_dictionary[contact_username]['audio_call'] = False
+                return OK, "Connection closed"
+            return OK, "Connection was closed"
 
         return ERROR, "Invalid Operation"

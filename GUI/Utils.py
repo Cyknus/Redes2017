@@ -16,18 +16,24 @@ from Services.Logger import *
 Builder.load_file('GUI/kivy/chat_utils.kv')
 
 class AudioWidget(BoxLayout):
-    def __init__(self, channel, **kwargs):
+    def __init__(self, channel, header, **kwargs):
         super(AudioWidget, self).__init__(**kwargs)
         # self.pa_call = AudioCall()
         # self.pa_call.openOutput()
         # self.pa_call.record(self.callback_audio)
         self.channel = channel
+        self.header = header
         self.log = Logger.getFor("AudioWidget")
 
     def hang_up(self):
         # self.pa_call.stopOutput()
         # self.pa_call.stop()
-        self.parent.remove_widget(self)
+        try:
+            self.channel.end_call(self.header + AUDIO)
+        except Exception as e:
+            self.log.error("Can't close connection: %s", e)
+        else:
+            self.parent.top_parent.close_audio_call()
 
     def callback_audio(self, in_data, f, t, s):
         self.channel.send_bytes(in_data)

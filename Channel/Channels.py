@@ -63,6 +63,17 @@ class RequestChannel():
         elif res[STATUS] == OK:
             self.log.debug("Got response: %s", res[MESSAGE])
 
+    @try_catch
+    def end_call(self, call):
+        self.log.debug("Terminating call with %s:%d", self.contact_ip, self.contact_port)
+
+        res = self.api_client.proxy.end_call_wrapper(call)
+        if res[STATUS] == ERROR:
+            self.log.error("Can't end call: %s", res[MESSAGE])
+            raise ValueError()
+        elif res[STATUS] == OK:
+            self.log.debug("Got response: %s", res[MESSAGE])
+            
     def send_bytes(self, data):
         try:
             print("[info] Streaming..")
