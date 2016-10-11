@@ -1,6 +1,6 @@
 # Redes2017
 
-## Práctica 6
+## Práctica 7
 
 **Integrantes**
 
