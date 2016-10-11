@@ -5,6 +5,7 @@ from Constants.AuxiliarFunctions import *
 from Constants.Constants import *
 from Services.Decorators import build_response, decode_message
 from Services.Logger import *
+from socketserver import TCPServer
 from xmlrpc.server import SimpleXMLRPCRequestHandler
 from xmlrpc.server import SimpleXMLRPCServer
 import threading
@@ -29,8 +30,7 @@ class MyApiServer:
         self.chats_dictionary = {}
         # configurar el servidor
         wrapper = FunctionWrapper(gui_parent, self.chats_dictionary)
-        self.server = SimpleXMLRPCServer((self.ip, self.port), requestHandler=RequestHandler)
-        self.server.register_introspection_functions()
+        self.server = Server((self.ip, self.port), requestHandler=RequestHandler)
         self.server.register_instance(wrapper)
         # get logger
         self.log = Logger.getFor("MyApiServer")
@@ -41,13 +41,11 @@ class MyApiServer:
             self.log.info("Local server running at %s:%d", self.ip, self.port)
             self.server.serve_forever()
         except KeyboardInterrupt:
-            self.server.shutdown()
-            self.server.server_close()
+            self.server.close()
 
     def stop(self):
         self.log.info("Shutting down server")
-        self.server.shutdown()
-        self.server.server_close()
+        self.server.close()
 
     def remove_chat(self, username):
         self.chats_dictionary.pop(username)
@@ -149,3 +147,17 @@ class FunctionWrapper:
 
     def ping_wrapper(self):
         return True
+
+class Server:
+    def __init__(self, addr, requestHandler):
+        self.socket = TCPServer(addr, requestHandler)
+
+    def register_instance(self, object):
+
+
+    def serve_forever(self):
+        self.socket.serve_forever()
+
+    def close(self):
+        self.socket.shutdown()
+        self.socket.server_close()
