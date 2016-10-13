@@ -54,18 +54,17 @@ class GeneralDirectory:
                 contacts = self.client_dictionary.items()
                 self.log.debug(self.client_dictionary.keys())
 
-            for k, v in contacts:
-                proxy = v[CHANNEL_CONTACT].api_client.proxy
-                try:
-                    proxy.ping_wrapper()
-                except:
-                    with lock:
+                for k, v in contacts:
+                    proxy = v[CHANNEL_CONTACT].api_client.proxy
+                    try:
+                        proxy.ping_wrapper()
+                    except:
                         self.client_dictionary.pop(k)
                         _contacts = self.client_dictionary.items()
 
-                    for _k, _v in _contacts:
-                        _proxy = _v[CHANNEL_CONTACT].api_client.proxy
-                        _proxy.remove_contact(k)
+                        for _k, _v in _contacts:
+                            _proxy = _v[CHANNEL_CONTACT].api_client.proxy
+                            _proxy.remove_contact(k)
             time.sleep(5)
 
 class FunctionWrapperDirectory:

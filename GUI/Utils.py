@@ -81,10 +81,12 @@ class ContactsList(Screen):
         self.log.info("%d contacts loaded", len(contacts))
 
     def remove_contact(self, username):
-        self.data.remove(username)
+        if username in self.data:
+            self.data.remove(username)
 
     def add_contact(self, username, ip, port):
-        self.data.append(ContactItem(username, ip, port))
+        if username not in self.data:
+            self.data.append(ContactItem(username, ip, port))
 
     def update_contacts(self):
         try:

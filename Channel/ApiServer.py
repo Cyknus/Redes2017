@@ -76,6 +76,7 @@ class FunctionWrapper:
         self.log.debug("New connection from %s@%s:%d", username, contact_ip, contact_port)
 
         if username not in self.chats_dictionary:
+            self.log.debug("Adding chat")
             self.gui_parent.current_screen.entry_connection(username, contact_ip, contact_port)
             self.chats_dictionary[username] = {
                 IP_CONTACT: contact_ip,
@@ -127,23 +128,15 @@ class FunctionWrapper:
 
     @build_response
     def remove_contact(self, username):
-        if username in self.chats_dictionary:
-            self.chats_dictionary.pop(username)
-            self.log.debug("Current online contacts: %s", self.chats_dictionary.keys())
-            self.gui_parent.current_screen.remove_contact(username)
+        self.log.debug("Current online contacts: %s", self.chats_dictionary.keys())
+        self.gui_parent.current_screen.remove_contact(username)
 
         return OK, "Contact {0} droped".format(username)
 
     @build_response
     def add_contact(self, username, ip, port):
-        if username not in self.chats_dictionary:
-            self.chats_dictionary[username] =  {
-                IP_CONTACT: ip,
-                PORT_CONTACT: port,
-                'audio_call': False
-            }
-            self.log.debug("Current online contacts: %s", self.chats_dictionary.keys())
-            self.gui_parent.current_screen.add_contact(username, ip, port)
+        self.log.debug("Current online contacts: %s", self.chats_dictionary.keys())
+        self.gui_parent.current_screen.add_contact(username, ip, port)
 
         return OK, "Contact {0} added".format(username)
 
